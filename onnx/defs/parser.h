@@ -7,10 +7,9 @@
 
 #pragma once
 
-#include <ctype.h>
-
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 #include "onnx/common/status.h"
 #include "onnx/onnx_pb.h"
@@ -281,11 +280,11 @@ class ParserBase {
     std::string value;
   };
 
-  Status Parse(Literal& result);
+  std::pair<Status, Literal> Parse();
 
   Status Parse(int64_t& val) {
-    Literal literal;
-    CHECK_PARSER_STATUS(Parse(literal));
+    auto [status, literal] = Parse();
+    CHECK_PARSER_STATUS(status);
     if (literal.type != LiteralType::INT_LITERAL)
       return ParseError("Integer value expected, but not found.");
     std::string s = literal.value;
@@ -294,8 +293,8 @@ class ParserBase {
   }
 
   Status Parse(uint64_t& val) {
-    Literal literal;
-    CHECK_PARSER_STATUS(Parse(literal));
+    auto [status, literal] = Parse();
+    CHECK_PARSER_STATUS(status);
     if (literal.type != LiteralType::INT_LITERAL)
       return ParseError("Integer value expected, but not found.");
     std::string s = literal.value;
@@ -304,8 +303,8 @@ class ParserBase {
   }
 
   Status Parse(float& val) {
-    Literal literal;
-    CHECK_PARSER_STATUS(Parse(literal));
+    auto [status, literal] = Parse();
+    CHECK_PARSER_STATUS(status);
     switch (literal.type) {
       case LiteralType::INT_LITERAL:
       case LiteralType::FLOAT_LITERAL:
@@ -318,8 +317,8 @@ class ParserBase {
   }
 
   Status Parse(double& val) {
-    Literal literal;
-    CHECK_PARSER_STATUS(Parse(literal));
+    auto [status, literal] = Parse();
+    CHECK_PARSER_STATUS(status);
     switch (literal.type) {
       case LiteralType::INT_LITERAL:
       case LiteralType::FLOAT_LITERAL:
@@ -332,13 +331,14 @@ class ParserBase {
   }
 
   // Parse a string-literal enclosed within double-quotes.
-  Status Parse(std::string& val) {
-    Literal literal;
-    CHECK_PARSER_STATUS(Parse(literal));
+  std::pair<Status, std::string> ParseString() {
+    auto [status, literal] = Parse();
+    if (!status.IsOK()) {
+      return {status, ""};
+    }
     if (literal.type != LiteralType::STRING_LITERAL)
-      return ParseError("String value expected, but not found.");
-    val = literal.value;
-    return Status::OK();
+      return {ParseError("String value expected, but not found."), ""};
+    return {Status::OK(), std::move(literal.value)};
   }
 
   // Parse an identifier, including keywords. If none found, this will
@@ -354,26 +354,25 @@ class ParserBase {
     return std::string(from, next_ - from);
   }
 
-  Status ParseIdentifier(std::string& id) {
-    id = ParseOptionalIdentifier();
+  std::pair<Status, std::string> ParseIdentifier() {
+    auto id = ParseOptionalIdentifier();
     if (id.empty())
-      return ParseError("Identifier expected but not found.");
-    return Status::OK();
+      return {ParseError("Identifier expected but not found."), ""};
+    return {Status::OK(), std::move(id)};
   }
 
-  Status ParseQuotableIdentifier(std::string& id) {
+  std::pair<Status, std::string> ParseQuotableIdentifier() {
     if (NextChar() == '"') {
-      return Parse(id);
+      return ParseString();
     }
-    return ParseIdentifier(id);
+    return ParseIdentifier();
   }
 
-  Status ParseOptionalQuotableIdentifier(std::string& id) {
+  std::pair<Status, std::string> ParseOptionalQuotableIdentifier() {
     if (NextChar() == '"') {
-      return Parse(id);
+      return ParseString();
     }
-    id = ParseOptionalIdentifier();
-    return Status::OK();
+    return {Status::OK(), ParseOptionalIdentifier()};
   }
 
   std::string PeekIdentifier() {
@@ -384,8 +383,8 @@ class ParserBase {
   }
 
   Status Parse(KeyWordMap::KeyWord& keyword) {
-    std::string id;
-    CHECK_PARSER_STATUS(ParseIdentifier(id));
+    auto [status, id] = ParseIdentifier();
+    CHECK_PARSER_STATUS(status);
     keyword = KeyWordMap::Lookup(id);
     return Status::OK();
   }

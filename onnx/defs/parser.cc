@@ -18,10 +18,11 @@
 
 namespace ONNX_NAMESPACE {
 
-Status ParserBase::Parse(Literal& result) {
+std::pair<Status, ParserBase::Literal> ParserBase::Parse() {
   bool decimal_point = false;
   auto nextch = NextChar();
   auto from = next_;
+  Literal result;
   if (nextch == '"') {
     ++next_;
     bool has_escape = false;
@@ -30,12 +31,12 @@ Status ParserBase::Parse(Literal& result) {
         has_escape = true;
         ++next_;
         if (next_ >= end_)
-          return ParseError("Incomplete string literal.");
+          return {ParseError("Incomplete string literal."), {}};
       }
       ++next_;
     }
     if (next_ >= end_)
-      return ParseError("Incomplete string literal.");
+      return {ParseError("Incomplete string literal."), {}};
     ++next_;
     result.type = LiteralType::STRING_LITERAL;
     if (has_escape) {
@@ -50,7 +51,7 @@ Status ParserBase::Parse(Literal& result) {
       }
     } else
       result.value = std::string(from + 1, next_ - from - 2); // skip enclosing quotes
-    return Status::OK();
+    return {Status::OK(), std::move(result)};
   }
 
   // Simplify the next ifs by consuming a possible negative sign.
@@ -75,9 +76,9 @@ Status ParserBase::Parse(Literal& result) {
         ONNX_HANDLE_EXCEPTION([&]() { return ParseError("Encountered invalid float literal!"); });
       }
     } else {
-      return ParseError("Encountered invalid float literal!");
+      return {ParseError("Encountered invalid float literal!"), {}};
     }
-    return Status::OK();
+    return {Status::OK(), std::move(result)};
   }
 
   // Checking for numeric ints or float literal.
@@ -94,7 +95,7 @@ Status ParserBase::Parse(Literal& result) {
     }
 
     if (next_ == from)
-      return ParseError("Value expected but not found.");
+      return {ParseError("Value expected but not found."), {}};
 
     // Optional exponent syntax: (e|E)(+|-)?[0-9]+
     if ((next_ < end_) && ((*next_ == 'e') || (*next_ == 'E'))) {
@@ -109,7 +110,7 @@ Status ParserBase::Parse(Literal& result) {
     result.value = std::string(from, next_ - from);
     result.type = decimal_point ? LiteralType::FLOAT_LITERAL : LiteralType::INT_LITERAL;
   }
-  return Status::OK();
+  return {Status::OK(), result};
 }
 
 bool ParserBase::NextIsValidFloatString() {
@@ -143,13 +144,14 @@ bool ParserBase::NextIsValidFloatString() {
 
 Status OnnxParser::Parse(IdList& idlist) {
   idlist.Clear();
-  std::string id;
-  CHECK_PARSER_STATUS(ParseOptionalQuotableIdentifier(id));
+  auto [status, id] = ParseOptionalQuotableIdentifier();
+  CHECK_PARSER_STATUS(status);
   if (id.empty())
     return Status::OK(); // Treat as empty list of identifiers
   *idlist.Add() = id;
   while (Matches(',')) {
-    CHECK_PARSER_STATUS(ParseOptionalQuotableIdentifier(id));
+    std::tie(status, id) = ParseOptionalQuotableIdentifier();
+    CHECK_PARSER_STATUS(status);
     *idlist.Add() = id;
   }
   return Status::OK();
@@ -168,8 +170,8 @@ Status OnnxParser::Parse(IdList& idlist, AttrList& attrlist) {
   idlist.Clear();
   attrlist.Clear();
   do {
-    std::string id;
-    CHECK_PARSER_STATUS(ParseQuotableIdentifier(id));
+    auto [status, id] = ParseQuotableIdentifier();
+    CHECK_PARSER_STATUS(status);
     auto next = NextChar();
     if (next == ':' || next == '=')
       Parse(*attrlist.Add(), id);
@@ -212,8 +214,8 @@ Status OnnxParser::Parse(TensorShapeProto& shape) {
 }
 
 Status OnnxParser::Parse(TypeProto& typeProto) {
-  std::string id;
-  CHECK_PARSER_STATUS(ParseIdentifier(id));
+  auto [status, id] = ParseIdentifier();
+  CHECK_PARSER_STATUS(status);
   int dtype = PrimitiveTypeNameMap::Lookup(id);
   if (dtype != 0) {
     auto* tensortype = typeProto.mutable_tensor_type();
@@ -246,7 +248,8 @@ Status OnnxParser::Parse(TypeProto& typeProto) {
         // Grammar: map ( prim-type , type )
         MATCH('(');
         auto* maptype = typeProto.mutable_map_type();
-        CHECK_PARSER_STATUS(ParseIdentifier(id));
+        std::tie(status, id) = ParseIdentifier();
+        CHECK_PARSER_STATUS(status);
         dtype = PrimitiveTypeNameMap::Lookup(id);
         if (dtype == 0) {
           return ParseError("Expecting primitive type as map key type.");
@@ -268,7 +271,8 @@ Status OnnxParser::Parse(TypeProto& typeProto) {
       case KeyWordMap::KeyWord::SPARSE_TENSOR_TYPE: {
         // Grammar: sparse_tensor ( tensor-type )
         MATCH('(');
-        CHECK_PARSER_STATUS(ParseIdentifier(id));
+        std::tie(status, id) = ParseIdentifier();
+        CHECK_PARSER_STATUS(status);
         dtype = PrimitiveTypeNameMap::Lookup(id);
         if (dtype != 0) {
           auto* sparsetype = typeProto.mutable_sparse_tensor_type();
@@ -303,8 +307,8 @@ Status OnnxParser::Parse(TypeProto& typeProto) {
 Status OnnxParser::Parse(ValueInfoProto& valueinfo) {
   if (NextIsType())
     PARSE(*valueinfo.mutable_type());
-  std::string name;
-  CHECK_PARSER_STATUS(ParseQuotableIdentifier(name));
+  auto [status, name] = ParseQuotableIdentifier();
+  CHECK_PARSER_STATUS(status);
   valueinfo.set_name(name);
   return Status::OK();
 }
@@ -344,7 +348,9 @@ Status OnnxParser::ParseFunctionInputOutput(IdList& idlist, ValueInfoList& vilis
         vi = vilist.Add();
         PARSE(*(vi->mutable_type()));
       }
-      CHECK_PARSER_STATUS(ParseQuotableIdentifier(*name));
+      Status status;
+      std::tie(status, *name) = ParseQuotableIdentifier();
+      CHECK_PARSER_STATUS(status);
       if (vi != nullptr)
         vi->set_name(*name);
     } while (Matches(','));
@@ -403,13 +409,14 @@ Status OnnxParser::ParseValueInfo(ValueInfoList& value_infos, TensorList& initia
 }
 
 Status OnnxParser::Parse(StringStringList& stringStringList) {
-  std::string strval;
   do {
     auto* metadata = stringStringList.Add();
-    PARSE_TOKEN(strval);
-    metadata->set_key(strval);
+    auto [status, strval] = ParseString();
+    CHECK_PARSER_STATUS(status);
+    metadata->set_key(std::move(strval));
     MATCH(':');
-    PARSE_TOKEN(strval);
+    std::tie(status, strval) = ParseString();
+    CHECK_PARSER_STATUS(status);
     metadata->set_value(strval);
   } while (Matches(','));
   return Status::OK();
@@ -448,6 +455,7 @@ Status OnnxParser::Parse(TensorProto& tensorProto, const TypeProto& tensorTypePr
   float floatval = 0.0;
   double dblval = 0.0;
   std::string strval;
+  Status status;
   if (Matches('{')) {
     if (!Matches('}')) {
       do {
@@ -491,7 +499,8 @@ Status OnnxParser::Parse(TensorProto& tensorProto, const TypeProto& tensorTypePr
             tensorProto.add_double_data(dblval);
             break;
           case TensorProto::DataType::TensorProto_DataType_STRING:
-            PARSE_TOKEN(strval);
+            std::tie(status, strval) = ParseString();
+            CHECK_PARSER_STATUS(status);
             tensorProto.add_string_data(strval);
             break;
           default:
@@ -540,7 +549,9 @@ Status OnnxParser::ParseSingleAttributeValue(AttributeProto& attr, AttributeProt
       if ((next == '{') || (next == '=') || (NextIsIdentifier())) {
         attr.set_type(AttributeProto_AttributeType_TENSOR);
         auto& tensorProto = *attr.mutable_t();
-        CHECK_PARSER_STATUS(ParseOptionalQuotableIdentifier(*tensorProto.mutable_name()));
+        Status status;
+        std::tie(status, *tensorProto.mutable_name()) = ParseOptionalQuotableIdentifier();
+        CHECK_PARSER_STATUS(status);
         (void)Matches('='); // Optional, to unify handling of initializers
         Parse(tensorProto, typeProto);
       } else {
@@ -549,8 +560,8 @@ Status OnnxParser::ParseSingleAttributeValue(AttributeProto& attr, AttributeProt
       }
     } else {
       if (NextIsValidFloatString()) {
-        Literal literal;
-        PARSE_TOKEN(literal);
+        auto [status, literal] = ParserBase::Parse();
+        CHECK_PARSER_STATUS(status);
         attr.set_type(AttributeProto_AttributeType_FLOAT);
         attr.set_f(static_cast<float>(std::stof(literal.value)));
       } else {
@@ -559,12 +570,12 @@ Status OnnxParser::ParseSingleAttributeValue(AttributeProto& attr, AttributeProt
       }
     }
   } else if (Matches('@')) {
-    std::string name;
-    CHECK_PARSER_STATUS(ParseQuotableIdentifier(name));
-    attr.set_ref_attr_name(name);
+    auto [status, name] = ParseQuotableIdentifier();
+    CHECK_PARSER_STATUS(status);
+    attr.set_ref_attr_name(std::move(name));
   } else {
-    Literal literal;
-    PARSE_TOKEN(literal);
+    auto [status, literal] = ParserBase::Parse();
+    CHECK_PARSER_STATUS(status);
     switch (literal.type) {
       case LiteralType::UNDEFINED:
         return ParseError("Internal error");
@@ -601,8 +612,8 @@ Status OnnxParser::ParseSingleAttributeValue(AttributeProto& attr, AttributeProt
 
 Status OnnxParser::Parse(AttributeProto& attr) {
   attr.Clear();
-  std::string name;
-  CHECK_PARSER_STATUS(ParseIdentifier(name));
+  auto [status, name] = ParseIdentifier();
+  CHECK_PARSER_STATUS(status);
   return Parse(attr, name);
 }
 
@@ -645,7 +656,10 @@ AttributeProto_AttributeType ToSingletonType(AttributeProto_AttributeType type) 
 Status OnnxParser::Parse(AttributeProto& attr, std::string& name) {
   attr.set_name(name);
   if (Matches(':')) {
-    CHECK_PARSER_STATUS(ParseIdentifier(name));
+    auto [status, id] = ParseIdentifier();
+    CHECK_PARSER_STATUS(status);
+    name = std::move(id);
+
     int attrtype = AttributeTypeNameMap::Lookup(name);
     if (attrtype != 0) {
       attr.set_type(static_cast<AttributeProto_AttributeType>(attrtype));
@@ -706,26 +720,29 @@ Status OnnxParser::Parse(AttrList& attrlist) {
 
 Status OnnxParser::Parse(NodeProto& node) {
   if (Matches('[')) {
-    CHECK_PARSER_STATUS(ParseOptionalQuotableIdentifier(*node.mutable_name()));
+    auto [status, name] = ParseOptionalQuotableIdentifier();
+    CHECK_PARSER_STATUS(status);
+    *node.mutable_name() = std::move(name);
     MATCH(']');
   }
   PARSE(*node.mutable_output());
   MATCH('=');
-  std::string domain("");
-  std::string id;
-  ParseIdentifier(id);
+  std::string domain;
+  auto [status, id] = ParseIdentifier();
+  CHECK_PARSER_STATUS(status);
   while (Matches('.')) {
     if (!domain.empty())
       domain += ".";
     domain += id;
-    ParseIdentifier(id);
+    std::tie(status, id) = ParseIdentifier();
+    CHECK_PARSER_STATUS(status);
   }
   node.set_domain(domain);
   node.set_op_type(id);
 
   if (Matches(':')) {
-    std::string overload;
-    ParseIdentifier(overload);
+    auto [status, overload] = ParseIdentifier();
+    CHECK_PARSER_STATUS(status);
     node.set_overload(overload);
   }
   PARSE(*node.mutable_attribute());
@@ -749,8 +766,8 @@ Status OnnxParser::Parse(NodeList& nodelist) {
 }
 
 Status OnnxParser::Parse(GraphProto& graph) {
-  std::string id;
-  CHECK_PARSER_STATUS(ParseQuotableIdentifier(id));
+  auto [status, id] = ParseQuotableIdentifier();
+  CHECK_PARSER_STATUS(status);
   return Parse(id, graph);
 }
 
@@ -767,26 +784,30 @@ Status OnnxParser::Parse(std::string name, GraphProto& graph) {
 
 Status OnnxParser::Parse(FunctionProto& fn) {
   fn.Clear();
-  std::string strval;
   if (Matches('<')) {
     do {
       KeyWordMap::KeyWord keyword = KeyWordMap::KeyWord::NONE;
       PARSE_TOKEN(keyword);
       MATCH(':');
+      std::string strval;
+      Status status;
       switch (keyword) {
         case KeyWordMap::KeyWord::OPSET_IMPORT:
           PARSE(*fn.mutable_opset_import());
           break;
         case KeyWordMap::KeyWord::DOC_STRING:
-          PARSE_TOKEN(strval);
+          std::tie(status, strval) = ParseString();
+          CHECK_PARSER_STATUS(status);
           fn.set_doc_string(strval);
           break;
         case KeyWordMap::KeyWord::DOMAIN_KW:
-          PARSE_TOKEN(strval);
+          std::tie(status, strval) = ParseString();
+          CHECK_PARSER_STATUS(status);
           fn.set_domain(strval);
           break;
         case KeyWordMap::KeyWord::OVERLOAD_KW:
-          PARSE_TOKEN(strval);
+          std::tie(status, strval) = ParseString();
+          CHECK_PARSER_STATUS(status);
           fn.set_overload(strval);
           break;
         default:
@@ -795,8 +816,8 @@ Status OnnxParser::Parse(FunctionProto& fn) {
     } while (Matches(','));
     MATCH('>');
   }
-  std::string id;
-  CHECK_PARSER_STATUS(ParseQuotableIdentifier(id));
+  auto [status, id] = ParseQuotableIdentifier();
+  CHECK_PARSER_STATUS(status);
   fn.set_name(id);
 
   PARSE('<', *fn.mutable_attribute(), *fn.mutable_attribute_proto(), '>');
@@ -812,13 +833,13 @@ Status OnnxParser::Parse(FunctionProto& fn) {
 }
 
 Status OnnxParser::Parse(OpsetIdList& opsets) {
-  std::string strval;
   int64_t intval = 0;
   MATCH('[');
   if (!Matches(']')) {
     do {
       auto* import = opsets.Add();
-      PARSE_TOKEN(strval);
+      auto [status, strval] = ParseString();
+      CHECK_PARSER_STATUS(status);
       import->set_domain(strval);
       MATCH(':');
       PARSE_TOKEN(intval);
@@ -832,6 +853,7 @@ Status OnnxParser::Parse(OpsetIdList& opsets) {
 Status OnnxParser::Parse(ModelProto& model) {
   model.Clear();
   std::string strval;
+  Status status;
   int64_t intval = 0;
   if (Matches('<')) {
     do {
@@ -847,15 +869,18 @@ Status OnnxParser::Parse(ModelProto& model) {
           PARSE(*model.mutable_opset_import());
           break;
         case KeyWordMap::KeyWord::PRODUCER_NAME:
-          PARSE_TOKEN(strval);
+          std::tie(status, strval) = ParseString();
+          CHECK_PARSER_STATUS(status);
           model.set_producer_name(strval);
           break;
         case KeyWordMap::KeyWord::PRODUCER_VERSION:
-          PARSE_TOKEN(strval);
+          std::tie(status, strval) = ParseString();
+          CHECK_PARSER_STATUS(status);
           model.set_producer_version(strval);
           break;
         case KeyWordMap::KeyWord::DOMAIN_KW:
-          PARSE_TOKEN(strval);
+          std::tie(status, strval) = ParseString();
+          CHECK_PARSER_STATUS(status);
           model.set_domain(strval);
           break;
         case KeyWordMap::KeyWord::MODEL_VERSION:
@@ -863,7 +888,8 @@ Status OnnxParser::Parse(ModelProto& model) {
           model.set_model_version(intval);
           break;
         case KeyWordMap::KeyWord::DOC_STRING:
-          PARSE_TOKEN(strval);
+          std::tie(status, strval) = ParseString();
+          CHECK_PARSER_STATUS(status);
           model.set_doc_string(strval);
           break;
         case KeyWordMap::KeyWord::METADATA_PROPS: {

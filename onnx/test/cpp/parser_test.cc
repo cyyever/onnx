@@ -51,8 +51,7 @@ TEST(ParserTest, EscapeStringLiteral) {
     "123\"56\\89"
   )");
 
-  std::string s;
-  auto status = parser.ParserBase::Parse(s);
+  auto [status, s] = parser.ParserBase::ParseString();
   EXPECT_TRUE(status.IsOK()) << status.ErrorMessage();
   EXPECT_TRUE(parser.EndOfInput()) << "Extra unparsed input unexpected.";
   EXPECT_EQ(s, std::string("123\"56\\89"));
