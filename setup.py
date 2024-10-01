@@ -4,8 +4,6 @@
 
 # NOTE: Put all metadata in pyproject.toml.
 # Set the environment variable `ONNX_PREVIEW_BUILD=1` to build the dev preview release.
-from __future__ import annotations
-
 import contextlib
 import datetime
 import glob
@@ -158,6 +156,7 @@ class CmakeBuild(setuptools.Command):
     user_options: ClassVar[list] = [
         ("jobs=", "j", "Specifies the number of jobs to use with make")
     ]
+    jobs = None
 
     def initialize_options(self):
         self.jobs = None
@@ -196,7 +195,7 @@ class CmakeBuild(setuptools.Command):
                         # we need to link with libpython on windows, so
                         # passing python version to window in order to
                         # find python in cmake
-                        f"-DPY_VERSION={'{}.{}'.format(*sys.version_info[:2])}",
+                        "-DPY_VERSION={'{}.{}'.format(*sys.version_info[:2])}",
                     ]
                 )
                 if USE_MSVC_STATIC_RUNTIME:
@@ -277,9 +276,8 @@ class BuildExt(setuptools.command.build_ext.build_ext):
             fullname = self.get_ext_fullname(ext.name)
             filename = os.path.basename(self.get_ext_filename(fullname))
 
-            if not WINDOWS:
-                lib_dir = CMAKE_BUILD_DIR
-            else:
+            lib_dir = CMAKE_BUILD_DIR
+            if WINDOWS:
                 # Windows compiled extensions are stored in Release/Debug subfolders
                 debug_lib_dir = os.path.join(CMAKE_BUILD_DIR, "Debug")
                 release_lib_dir = os.path.join(CMAKE_BUILD_DIR, "Release")
