@@ -307,8 +307,9 @@ def make_model(graph: GraphProto, **kwargs: Any) -> ModelProto:
     model.ir_version = IR_VERSION
     model.graph.CopyFrom(graph)
 
-    opset_imports: Sequence[OperatorSetIdProto] | None = None
-    opset_imports = kwargs.pop("opset_imports", None)  # type: ignore
+    opset_imports: Sequence[OperatorSetIdProto] | None = kwargs.pop(
+        "opset_imports", None
+    )
     if opset_imports is not None:
         model.opset_import.extend(opset_imports)
     else:
@@ -316,8 +317,7 @@ def make_model(graph: GraphProto, **kwargs: Any) -> ModelProto:
         imp = model.opset_import.add()
         imp.version = defs.onnx_opset_version()
 
-    functions: Sequence[FunctionProto] | None = None
-    functions = kwargs.pop("functions", None)  # type: ignore
+    functions: Sequence[FunctionProto] | None = kwargs.pop("functions", None)
     if functions is not None:
         model.functions.extend(functions)
 
@@ -665,11 +665,13 @@ def pack_float32_to_4bit(array: np.ndarray | Sequence, signed: bool) -> np.ndarr
     if is_odd_volume:
         array_flat = np.append(array_flat, np.array([0]))
 
-    single_func = lambda x, y: subbyte.float32x2_to_4bitx2(x, y, signed)  # noqa: E731
+    def single_func(x, y) -> np.ndarray:
+        return subbyte.float32x2_to_4bitx2(x, y, signed)
+
     func = np.frompyfunc(single_func, 2, 1)
 
     arr = func(array_flat[0::2], array_flat[1::2])
-    return arr.astype(np.uint8)  # type: ignore[no-any-return]
+    return arr.astype(np.uint8)
 
 
 def pack_float32_to_float4e2m1(array: np.ndarray | Sequence) -> np.ndarray:
@@ -742,7 +744,7 @@ def make_tensor(
         else:
             expected_size = np_dtype.itemsize
 
-    if type(vals) is np.ndarray and len(vals.shape) > 1:
+    if isinstance(vals, np.ndarray) and len(vals.shape) > 1:
         vals = vals.flatten()
     for d in dims:
         expected_size *= d
@@ -892,7 +894,7 @@ def make_map(
         map_proto.string_keys.extend(keys)
     elif key_type in valid_key_int_types:
         map_proto.keys.extend(keys)
-    map_proto.values.CopyFrom(values)
+    map_proto.values.CopyFrom(values)  # type: ignore[arg-type]
     return map_proto
 
 
@@ -921,7 +923,7 @@ def make_optional(
     else:
         raise TypeError("The element type in the input optional is not supported.")
 
-    attribute.CopyFrom(value)  # type: ignore[arg-type]
+    attribute.CopyFrom(value)
     return optional
 
 
@@ -1462,9 +1464,7 @@ def printable_graph(graph: GraphProto, prefix: str = "") -> str:
     if len(graph.input):
         header.append("(")
         in_strs = []  # required inputs
-        in_with_init_strs = (
-            []
-        )  # optional inputs with initializer providing default value
+        in_with_init_strs = []  # optional inputs with initializer providing default value
         for inp in graph.input:
             if inp.name not in initializers:
                 in_strs.append(printable_value_info(inp))
@@ -1659,7 +1659,9 @@ def get_all_tensor_dtypes() -> KeysView[int]:
     return mapping.TENSOR_TYPE_MAP.keys()
 
 
-_ATTRIBUTE_TYPE_TO_STR = {k: v for v, k in AttributeProto.AttributeType.items()}
+_ATTRIBUTE_TYPE_TO_STR: dict[int, str] = {
+    k: v for v, k in AttributeProto.AttributeType.items()
+}
 
 
 def _attr_type_to_str(attr_type: int) -> str:
@@ -1672,5 +1674,5 @@ def _attr_type_to_str(attr_type: int) -> str:
         String representing the supplied attr_type.
     """
     if attr_type in AttributeProto.AttributeType.values():
-        return _ATTRIBUTE_TYPE_TO_STR[attr_type]  # type: ignore[no-any-return]
-    return AttributeProto.AttributeType.keys()[0]  # type: ignore[no-any-return]
+        return _ATTRIBUTE_TYPE_TO_STR[attr_type]
+    return AttributeProto.AttributeType.keys()[0]

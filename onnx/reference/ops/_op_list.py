@@ -14,9 +14,7 @@ did not change the implementation.
 from __future__ import annotations
 
 import textwrap
-from typing import Any, Dict, List
-from typing import Optional as TOptional
-from typing import Union
+from typing import Any
 
 from onnx import FunctionProto, NodeProto, TypeProto
 from onnx.defs import get_schema, onnx_opset_version

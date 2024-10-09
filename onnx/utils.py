@@ -20,10 +20,10 @@ class Extractor:
         self.vimap = self._build_name2obj_dict(self.graph.value_info)
 
     @staticmethod
-    def _build_name2obj_dict(objs):  # type: ignore
+    def _build_name2obj_dict(objs) -> dict:
         return {obj.name: obj for obj in objs}
 
-    def _collect_new_io_core(self, original_io, io_names_to_extract):  # type: ignore
+    def _collect_new_io_core(self, original_io, io_names_to_extract) -> list:
         original_io_map = self._build_name2obj_dict(original_io)
         original_io_names = set(original_io_map)
         s_io_names_to_extract = set(io_names_to_extract)
@@ -39,10 +39,10 @@ class Extractor:
         return [new_io_tensors_map[name] for name in io_names_to_extract]
 
     def _collect_new_inputs(self, names: list[str]) -> list[ValueInfoProto]:
-        return self._collect_new_io_core(self.graph.input, names)  # type: ignore
+        return self._collect_new_io_core(self.graph.input, names)
 
     def _collect_new_outputs(self, names: list[str]) -> list[ValueInfoProto]:
-        return self._collect_new_io_core(self.graph.output, names)  # type: ignore
+        return self._collect_new_io_core(self.graph.output, names)
 
     def _dfs_search_reachable_nodes(
         self,
@@ -106,13 +106,15 @@ class Extractor:
 
     def _collect_referred_local_functions(
         self,
-        nodes,  # type: list[NodeProto]
-    ):  # type: (...) -> list[FunctionProto]
+        nodes: list[NodeProto],
+    ) -> list[FunctionProto]:
         # a node in a model graph may refer a function.
         # a function contains nodes, some of which may in turn refer a function.
         # we need to find functions referred by graph nodes and
         # by nodes used to define functions.
-        def find_referred_funcs(nodes, referred_local_functions):  # type: ignore
+        def find_referred_funcs(
+            nodes: list[NodeProto], referred_local_functions: list[FunctionProto]
+        ) -> list[NodeProto]:
             new_nodes = []  # type: list[NodeProto]
             for node in nodes:
                 # check if the node is a function op
@@ -265,7 +267,7 @@ def _tar_members_filter(
                 f"The tarball member {member_path} in downloading model contains "
                 f"directory traversal sequence which may contain harmful payload."
             )
-        elif member.issym() or member.islnk():
+        if member.issym() or member.islnk():
             raise RuntimeError(
                 f"The tarball member {member_path} in downloading model contains "
                 f"symbolic links which may contain harmful payload."

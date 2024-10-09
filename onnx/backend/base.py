@@ -76,24 +76,25 @@ class Backend:
 
     @classmethod
     def is_compatible(
-        cls, model: ModelProto, device: str = "CPU", **kwargs: Any  # noqa: ARG003
+        cls,
+        **kwargs: Any,
     ) -> bool:
         # Return whether the model is compatible with the backend.
         return True
 
     @classmethod
     def prepare(
-        cls, model: ModelProto, device: str = "CPU", **kwargs: Any  # noqa: ARG003
-    ) -> BackendRep | None:
-        # TODO Remove Optional from return type
+        cls,
+        model: ModelProto,
+        **kwargs: Any,
+    ) -> None:
         onnx.checker.check_model(model)
-        return None
 
     @classmethod
     def run_model(
         cls, model: ModelProto, inputs: Any, device: str = "CPU", **kwargs: Any
     ) -> tuple[Any, ...]:
-        backend = cls.prepare(model, device, **kwargs)
+        backend = cls.prepare(model, device=device, **kwargs)
         assert backend is not None
         return backend.run(inputs)
 
@@ -107,7 +108,7 @@ class Backend:
             Sequence[tuple[numpy.dtype, tuple[int, ...]]] | None
         ) = None,
         **kwargs: dict[str, Any],
-    ) -> tuple[Any, ...] | None:
+    ) -> None:
         """Simple run one operator and return the results.
 
         Args:
@@ -120,7 +121,6 @@ class Backend:
                 https://github.com/onnx/onnx/blob/main/onnx/backend/test/runner/__init__.py
             kwargs: Other keyword arguments.
         """
-        # TODO Remove Optional from return type
         if "opset_version" in kwargs:
             special_context = c_checker.CheckerContext()
             special_context.ir_version = IR_VERSION
@@ -128,8 +128,6 @@ class Backend:
             onnx.checker.check_node(node, special_context)
         else:
             onnx.checker.check_node(node)
-
-        return None
 
     @classmethod
     def supports_device(cls, device: str) -> bool:  # noqa: ARG003
