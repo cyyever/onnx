@@ -37,7 +37,7 @@ struct Upsample_9_8 final : public Adapter {
         for (float j : value) {
           d_values.push_back(static_cast<double>(j));
         }
-        node->fs_(kscales, const_cast<std::vector<double>&&>(d_values));
+        node->fs_(BuiltinSymbol::kscales, const_cast<std::vector<double>&&>(d_values));
 
         node->removeInput(1);
         graph->eraseInitializer(initializer.name());
@@ -52,14 +52,14 @@ struct Upsample_9_8 final : public Adapter {
     }
 
     for (Node* op : graph->nodes()) {
-      if (op->kind() == kConstant && op->outputs()[0]->uniqueName() == scale_input_name) {
-        std::vector<float> value = ParseData<float>(&op->t(kvalue));
+      if (op->kind() == BuiltinSymbol::kConstant && op->outputs()[0]->uniqueName() == scale_input_name) {
+        std::vector<float> value = ParseData<float>(&op->t(BuiltinSymbol::kvalue));
         std::vector<double> d_values;
         d_values.reserve(value.size());
         for (float j : value) {
           d_values.push_back(static_cast<double>(j));
         }
-        node->fs_(kscales, const_cast<std::vector<double>&&>(d_values));
+        node->fs_(BuiltinSymbol::kscales, const_cast<std::vector<double>&&>(d_values));
         node->removeInput(1);
         op->destroy();
         return;
