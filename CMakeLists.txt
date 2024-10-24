@@ -16,6 +16,7 @@ cmake_policy(SET CMP0074 NEW)
 
 # Project
 project(onnx C CXX)
+option(ONNX_BUILD_CUSTOM_PROTOBUF "Build and use ONNX's own protobuf under third_party" ON)
 option(ONNX_USE_PROTOBUF_SHARED_LIBS "Build ONNX using protobuf shared library." OFF)
 
 option(BUILD_ONNX_PYTHON "Build Python binaries" OFF)
@@ -132,7 +133,7 @@ if((ONNX_USE_LITE_PROTO AND TARGET protobuf::libprotobuf-lite) OR ((NOT ONNX_USE
   else()
     set(ONNX_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)
   endif()
-else()
+elseif(NOT ONNX_BUILD_CUSTOM_PROTOBUF)
   # Customized version of find Protobuf. We need to avoid situations mentioned
   # in https://github.com/caffe2/caffe2/blob/b7d983f255ef5496474f1ea188edb5e0ac4
   # 42761/cmake/ProtoBuf.cmake#L82-L92 The following section is stolen from
@@ -222,13 +223,11 @@ else()
           utf8_range::utf8_validity
         )
       endif()
-    else()
-      set(Build_Protobuf ON)
     endif()
-  else()  # Protobuf_PROTOC_EXECUTABLE not found.
-    set(Build_Protobuf ON)
   endif()
-  if (Build_Protobuf)
+endif()
+if(NOT ONNX_PROTOC_EXECUTABLE)
+  set(Build_Protobuf ON)
     set(protobuf_MSVC_STATIC_RUNTIME ${ONNX_USE_MSVC_STATIC_RUNTIME})
     set(ABSL_MSVC_STATIC_RUNTIME ${ONNX_USE_MSVC_STATIC_RUNTIME})
 
@@ -269,10 +268,9 @@ else()
     set(BUILD_SHARED_LIBS ${ONNX_BUILD_SHARED_LIBS})
     set(PROTOBUF_DIR "${protobuf_BINARY_DIR}")
     set(PROTOBUF_INCLUDE_DIR "${protobuf_SOURCE_DIR}/src")
-  endif()
-  message(STATUS "ONNX_PROTOC_EXECUTABLE: ${ONNX_PROTOC_EXECUTABLE}")
-  message(STATUS "Protobuf_VERSION: ${Protobuf_VERSION}")
 endif()
+message(STATUS "ONNX_PROTOC_EXECUTABLE: ${ONNX_PROTOC_EXECUTABLE}")
+message(STATUS "Protobuf_VERSION: ${Protobuf_VERSION}")
 
 # abseil build would fail if ONNX_WERROR is on.
 if(ONNX_WERROR)
@@ -497,13 +495,13 @@ endif()
 target_compile_definitions(onnx_proto PRIVATE ${ONNX_API_DEFINE})
 
 if(ONNX_USE_LITE_PROTO)
-  if(TARGET protobuf::libprotobuf-lite)
+  if(TARGET protobuf::libprotobuf-lite AND NOT Build_Protobuf)
     target_link_libraries(onnx_proto PUBLIC protobuf::libprotobuf-lite PRIVATE ${protobuf_ABSL_USED_TARGETS})
   else()
     target_link_libraries(onnx_proto PUBLIC ${PROTOBUF_LITE_LIBRARIES})
   endif()
 else()
-  if(TARGET protobuf::libprotobuf)
+  if(TARGET protobuf::libprotobuf AND NOT Build_Protobuf)
     target_link_libraries(onnx_proto PUBLIC protobuf::libprotobuf PRIVATE ${protobuf_ABSL_USED_TARGETS})
   else()
     target_link_libraries(onnx_proto PUBLIC ${PROTOBUF_LIBRARIES})
