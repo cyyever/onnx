@@ -2,3 +2,6 @@
     path = third_party/pybind11
     url = https://github.com/pybind/pybind11.git
     branch = master
+[submodule "cmake2"]
+	path = cmake2
+	url = git@github.com:cyyever/cmake.git

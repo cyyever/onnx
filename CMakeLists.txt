@@ -16,6 +16,9 @@ cmake_policy(SET CMP0074 NEW)
 
 # Project
 project(onnx C CXX)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake2/module)
+include(cmake2/test.cmake)
+find_package(Sanitizer REQUIRED)
 option(ONNX_USE_PROTOBUF_SHARED_LIBS "Build ONNX using protobuf shared library." OFF)
 
 option(BUILD_ONNX_PYTHON "Build Python binaries" OFF)
@@ -718,6 +721,16 @@ if(ONNX_USE_UNITY_BUILD)
 
 # should be enabled for onnx_proto when protobuf can support Unity builds
 
+endif()
+target_link_libraries(onnx PUBLIC Sanitizer::address)
+target_link_libraries(onnx PUBLIC Sanitizer::undefined)
+if(TARGET onnx_proto)
+  target_link_libraries(onnx_proto PUBLIC Sanitizer::address)
+  target_link_libraries(onnx_proto PUBLIC Sanitizer::undefined)
+endif()
+if(TARGET onnx_cpp2py_export)
+  target_link_libraries(onnx_cpp2py_export PUBLIC Sanitizer::address)
+  target_link_libraries(onnx_cpp2py_export PUBLIC Sanitizer::undefined)
 endif()
 
 
