@@ -261,7 +261,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             true,
             1,
             OpSchema::Differentiable)
-        .FillUsing(RNNDocGenerator("RNN")));
+        .FillUsing(RNNDocGenerator("RNN")))
 
 static const char* GRU_ver22_doc = R"DOC(
 Computes an one-layer GRU. This operator is usually supported via some custom
@@ -366,7 +366,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             true,
             1,
             OpSchema::Differentiable)
-        .FillUsing(RNNDocGenerator("GRU")));
+        .FillUsing(RNNDocGenerator("GRU")))
 
 static const char* LSTM_ver22_doc = R"DOC(
 Computes an one-layer LSTM. This operator is usually supported via some
@@ -515,5 +515,5 @@ ONNX_OPERATOR_SET_SCHEMA(
             OpSchema::Optional,
             true,
             1,
-            OpSchema::Differentiable));
+            OpSchema::Differentiable))
 } // namespace ONNX_NAMESPACE

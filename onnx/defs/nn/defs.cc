@@ -333,7 +333,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "count_include_pad",
             "Whether include pad pixels when calculating values for the edges. Default is 0, doesn't count include pad.",
             AttributeProto::INT,
-            static_cast<int64_t>(0)));
+            static_cast<int64_t>(0)))
 
 ONNX_OPERATOR_SET_SCHEMA(
     MaxPool,
@@ -371,7 +371,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             true,
             1,
             OpSchema::NonDifferentiable)
-        .TypeConstraint("I", {"tensor(int64)"}, "Constrain index tensor to int64"));
+        .TypeConstraint("I", {"tensor(int64)"}, "Constrain index tensor to int64"))
 
 static void maxUnpoolShapeInference(InferenceContext& ctx) {
   // we need at least two inputs to have a shape for this inference.
@@ -546,7 +546,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             OpSchema::Differentiable)
         .TypeConstraint("T1", OpSchema::all_float_types_ir4(), "Constrain input and output types to float tensors.")
         .TypeConstraint("T2", {"tensor(int64)"}, "Constrain index tensor to int64")
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { maxUnpoolShapeInference(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { maxUnpoolShapeInference(ctx); }))
 
 static std::function<void(OpSchema&)> LpPoolOpSchemaGenerator(const char* name) {
   return [=](OpSchema& schema) {
@@ -632,7 +632,7 @@ static std::function<void(OpSchema&)> LpPoolOpSchemaGenerator(const char* name) 
   };
 }
 
-ONNX_OPERATOR_SET_SCHEMA(LpPool, 22, OpSchema().FillUsing(LpPoolOpSchemaGenerator("LpPool")));
+ONNX_OPERATOR_SET_SCHEMA(LpPool, 22, OpSchema().FillUsing(LpPoolOpSchemaGenerator("LpPool")))
 
 // For ROI pool operations.
 static void roiPoolTypeShapeInference(InferenceContext& ctx) {
@@ -727,7 +727,7 @@ static std::function<void(OpSchema&)> RoiPoolOpSchemaGenerator(const char* name)
   };
 }
 
-ONNX_OPERATOR_SET_SCHEMA(MaxRoiPool, 22, OpSchema().FillUsing(RoiPoolOpSchemaGenerator("max")));
+ONNX_OPERATOR_SET_SCHEMA(MaxRoiPool, 22, OpSchema().FillUsing(RoiPoolOpSchemaGenerator("max")))
 
 static std::function<void(OpSchema&)> ConvOpSchemaGenerator(const char* filter_desc) {
   return [=](OpSchema& schema) {
@@ -830,7 +830,7 @@ computes the output.)DOC";
   };
 }
 
-ONNX_OPERATOR_SET_SCHEMA(Conv, 22, OpSchema().FillUsing(ConvOpSchemaGenerator("a filter")));
+ONNX_OPERATOR_SET_SCHEMA(Conv, 22, OpSchema().FillUsing(ConvOpSchemaGenerator("a filter")))
 
 static const char* QLinearConv_ver10_doc = R"DOC(
 The convolution operator consumes a quantized input tensor, its scale and zero point,
@@ -982,7 +982,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           propagateElemTypeFromInputToOutput(ctx, 7, 0);
 
           convPoolShapeInference(ctx, true, false, 0, 3);
-        }));
+        }))
 
 static const char* ConvInteger_ver10_doc = R"DOC(
 The integer convolution operator consumes an input tensor, its zero-point, a filter, and its zero-point,
@@ -1099,7 +1099,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           y_type->mutable_tensor_type()->set_elem_type(TensorProto::INT32);
 
           convPoolShapeInference(ctx, true, false, 0, 1);
-        }));
+        }))
 
 static void convTransposeShapeInference(InferenceContext& ctx) {
   propagateElemTypeFromInputToOutput(ctx, 0, 0);
@@ -1363,7 +1363,7 @@ output_shape can also be explicitly specified in which case pads values are auto
   };
 }
 
-ONNX_OPERATOR_SET_SCHEMA(ConvTranspose, 22, OpSchema().FillUsing(ConvTransposeOpSchemaGenerator("a filter")));
+ONNX_OPERATOR_SET_SCHEMA(ConvTranspose, 22, OpSchema().FillUsing(ConvTransposeOpSchemaGenerator("a filter")))
 
 static const char* DeformConv_ver22_doc = R"DOC(
 Performs deformable convolution as described in https://arxiv.org/abs/1703.06211 and https://arxiv.org/abs/1811.11168.
@@ -1458,7 +1458,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .TypeAndShapeInferenceFunction([](InferenceContext& ctx) {
           propagateElemTypeFromInputToOutput(ctx, 0, 0);
           convPoolShapeInference(ctx, true, false, 0, 1);
-        }));
+        }))
 
 // For GlobalPool operations.
 static void globalPoolTypeShapeInference(InferenceContext& ctx) {
@@ -1531,8 +1531,8 @@ static std::function<void(OpSchema&)> GlobalPoolingOpSchemaGenerator(const char*
 ONNX_OPERATOR_SET_SCHEMA(
     GlobalAveragePool,
     22,
-    OpSchema().FillUsing(GlobalPoolingOpSchemaGenerator("AveragePool", "average")));
-ONNX_OPERATOR_SET_SCHEMA(GlobalMaxPool, 22, OpSchema().FillUsing(GlobalPoolingOpSchemaGenerator("MaxPool", "max")));
+    OpSchema().FillUsing(GlobalPoolingOpSchemaGenerator("AveragePool", "average")))
+ONNX_OPERATOR_SET_SCHEMA(GlobalMaxPool, 22, OpSchema().FillUsing(GlobalPoolingOpSchemaGenerator("MaxPool", "max")))
 
 static std::function<void(OpSchema&)> GlobalLpPoolingOpSchemaGenerator(const char* op_type, const char* op) {
   return [=](OpSchema& schema) {
@@ -1578,7 +1578,7 @@ static std::function<void(OpSchema&)> GlobalLpPoolingOpSchemaGenerator(const cha
   };
 }
 
-ONNX_OPERATOR_SET_SCHEMA(GlobalLpPool, 22, OpSchema().FillUsing(GlobalLpPoolingOpSchemaGenerator("LpPool", "lp pool")));
+ONNX_OPERATOR_SET_SCHEMA(GlobalLpPool, 22, OpSchema().FillUsing(GlobalLpPoolingOpSchemaGenerator("LpPool", "lp pool")))
 
 static const char* BatchNormalization_ver15_doc = R"DOC(
 Carries out batch normalization as described in the paper
@@ -1758,7 +1758,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               updateOutputShape(ctx, 2, outputs_shape);
             }
           }
-        }));
+        }))
 
 static const char* InstanceNormalization_ver22_doc = R"DOC(
 Carries out instance normalization as described in the paper
@@ -1819,7 +1819,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             1,
             OpSchema::Differentiable)
         .TypeConstraint("T", OpSchema::all_float_types_ir4(), "Constrain input and output types to float tensors.")
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { propagateShapeAndTypeFromFirstInput(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { propagateShapeAndTypeFromFirstInput(ctx); }))
 
 static const char* LpNormalization_ver22_doc = R"DOC(
 Given a matrix, apply Lp-normalization along the provided axis.
@@ -1843,7 +1843,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "The order of the normalization, only 1 or 2 are supported.",
             AttributeProto::INT,
             static_cast<int64_t>(2))
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { propagateShapeAndTypeFromFirstInput(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { propagateShapeAndTypeFromFirstInput(ctx); }))
 
 static const char* Dropout_ver22_doc = R"DOC(
 Dropout takes an input floating-point tensor, an optional input ratio (floating-point scalar) and an optional input training_mode (boolean scalar). It produces two tensor outputs,
@@ -1924,7 +1924,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               propagateShapeFromInputToOutput(ctx, 0, 1);
             }
           }
-        }));
+        }))
 
 static const char* Shrink_ver9_doc = R"DOC(
 Shrink takes one input data (Tensor<numeric>) and produces one Tensor output,
@@ -1962,7 +1962,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             output = Where(InputLessThanNegLambda, InputAddBias, InputSubBiasOrZero)
           }
         )ONNX",
-            18));
+            18))
 
 static const char* Flatten_ver11_doc = R"DOC(
 Flattens the input tensor into a 2D matrix. If input tensor has shape
@@ -2017,7 +2017,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
           // TODO: is the operation defined for input-rank < 2?
           updateOutputShape(ctx, 0, {multiplyDims(input_shape, 0, axis), multiplyDims(input_shape, axis, rank)});
-        }));
+        }))
 
 static const char* LRN_ver13_doc = R"DOC(
 Local Response Normalization proposed in the [AlexNet paper](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf).
@@ -2074,7 +2074,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "Constrain input and output "
             " types to float tensors.")
         .SetDoc(LRN_ver13_doc)
-        .TypeAndShapeInferenceFunction(propagateShapeAndTypeFromFirstInput));
+        .TypeAndShapeInferenceFunction(propagateShapeAndTypeFromFirstInput))
 
 static const char* TfIdfVectorizer_ver9_doc = R"DOC(
 This transform extracts n-grams from the input sequence and save them as a vector. Input can
@@ -2200,7 +2200,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             updateOutputShape(ctx, 0, output_shape);
           }
         })
-        .SetDoc(TfIdfVectorizer_ver9_doc));
+        .SetDoc(TfIdfVectorizer_ver9_doc))
 
 static const char* mvn_ver13_doc = R"DOC(
       A MeanVarianceNormalization Function: Perform mean variance normalization
@@ -2260,7 +2260,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           Y = Div (X_variance, Processed_STD)
         }
         )ONNX",
-            18));
+            18))
 
 static void col2imShapeInference(InferenceContext& ctx) {
   propagateElemTypeFromInputToOutput(ctx, 0, 0);
@@ -2445,7 +2445,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "T",
             OpSchema::all_tensor_types_ir4(),
             "Constrain input and output types to all numeric tensor types.")
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { col2imShapeInference(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { col2imShapeInference(ctx); }))
 
 static const char* LayerNormalization_ver17_doc = R"DOC(
       This is layer normalization defined in ONNX as function.
@@ -2685,7 +2685,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             for (int d = static_cast<int>(axis); d < input_ndim; ++d)
               inv_std_dev_shape->mutable_dim(d)->set_dim_value(1);
           }
-        }));
+        }))
 
 static const char* GroupNormalization_ver21_doc = R"DOC(
 A GroupNormalization function. Carries out group normalization as described in
@@ -2828,5 +2828,5 @@ ONNX_OPERATOR_SET_SCHEMA(
 
               schema.BuildFunction(functionProto);
               return true;
-            }));
+            }))
 } // namespace ONNX_NAMESPACE

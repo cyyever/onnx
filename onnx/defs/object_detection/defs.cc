@@ -119,7 +119,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           // set output shape:
           updateOutputShape(ctx, 0, {num_rois, C, ht, width});
-        }));
+        }))
 
 static const char* NonMaxSuppression_ver11_doc = R"DOC(
 Filter out boxes that have high intersection-over-union (IOU) overlap with previously selected boxes.
@@ -194,6 +194,6 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           // The value of the second dim is 3
           selected_indices_shape->add_dim()->set_dim_value(3);
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE

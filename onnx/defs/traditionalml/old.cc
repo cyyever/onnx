@@ -55,7 +55,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           } else if (TensorProto::INT64 == input_elem_type) {
             output_elem_type->set_elem_type(TensorProto::STRING);
           }
-        }));
+        }))
 
 static const char* TreeEnsembleClassifier_ver1_doc = R"DOC(
     Tree Ensemble classifier.  Returns the top class for each of N inputs.<br>
@@ -156,7 +156,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           } else {
             output_elem_type->set_elem_type(TensorProto::INT64);
           }
-        }));
+        }))
 
 static const char* TreeEnsembleClassifier_ver3_doc = R"DOC(
     Tree Ensemble classifier. Returns the top class for each of N inputs.<br>
@@ -323,7 +323,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           }
           updateOutputShape(ctx, 0, {N});
           updateOutputShape(ctx, 1, {N, E});
-        }));
+        }))
 
 static const char* TreeEnsembleRegressor_ver1_doc = R"DOC(
     Tree Ensemble regressor.  Returns the regressed values for each input in N.<br>
@@ -402,7 +402,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "Base values for classification, added to final class score; the size must be the same as the classes or "
             "can be left unassigned (assumed 0)",
             AttributeProto::FLOATS,
-            OPTIONAL_VALUE));
+            OPTIONAL_VALUE))
 
 static const char* TreeEnsembleRegressor_ver3_doc = R"DOC(
     Tree Ensemble regressor.  Returns the regressed values for each input in N.<br>
@@ -536,7 +536,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           }
           updateOutputElemType(ctx, 0, TensorProto::FLOAT);
           updateOutputShape(ctx, 0, {N, E});
-        }));
+        }))
 
 static const char* LabelEncoder_ver2_doc = R"DOC(
     Maps each element in the input tensor to another value.<br>
@@ -652,6 +652,6 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
 
           // Input and output shapes are the same.
           propagateShapeFromInputToOutput(ctx, 0, 0);
-        }));
+        }))
 } // namespace ONNX_NAMESPACE
 #endif

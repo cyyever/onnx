@@ -2,7 +2,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "onnx/defs/function.h"
 #include "onnx/defs/schema.h"
 
 namespace ONNX_NAMESPACE {
@@ -131,7 +130,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* DequantizeLinear_ver21_doc = R"DOC(
 The linear dequantization operator. It consumes a quantized tensor, a scale, and a zero point to compute the
@@ -208,7 +207,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* DynamicQuantizeLinear_ver11_doc = R"DOC(
 A Function to fuse calculation for Scale, Zero Point and FP32->8Bit conversion of FP32 Input data.
@@ -292,6 +291,6 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE

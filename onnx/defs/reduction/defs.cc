@@ -2,27 +2,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <algorithm>
 #include <functional>
 
-#include "onnx/defs/function.h"
 #include "onnx/defs/reduction/utils.h"
 #include "onnx/defs/schema.h"
-#include "onnx/defs/tensor_proto_util.h"
 
 namespace ONNX_NAMESPACE {
 
 ONNX_OPERATOR_SET_SCHEMA(
     ReduceMax,
     20,
-    OpSchema().FillUsing(ReduceOpGenerator("max", EMPTY_MIN, true, true, nullptr, nullptr, true)));
+    OpSchema().FillUsing(ReduceOpGenerator("max", EMPTY_MIN, true, true, nullptr, nullptr, true)))
 
 ONNX_OPERATOR_SET_SCHEMA(
     ReduceMin,
     20,
-    OpSchema().FillUsing(ReduceOpGenerator("min", EMPTY_MAX, true, true, nullptr, nullptr, true)));
+    OpSchema().FillUsing(ReduceOpGenerator("min", EMPTY_MAX, true, true, nullptr, nullptr, true)))
 
-ONNX_OPERATOR_SET_SCHEMA(ReduceSum, 13, OpSchema().FillUsing(ReduceOpDynamicAxes("sum", EMPTY_ZERO)));
+ONNX_OPERATOR_SET_SCHEMA(ReduceSum, 13, OpSchema().FillUsing(ReduceOpDynamicAxes("sum", EMPTY_ZERO)))
 
 static const char* reduce_sum_square_func_body = R"ONNX(
   {
@@ -34,11 +31,11 @@ static const char* reduce_sum_square_func_body = R"ONNX(
 ONNX_OPERATOR_SET_SCHEMA(
     ReduceSumSquare,
     18,
-    OpSchema().FillUsing(ReduceFunctionOp("sum square", EMPTY_ZERO, reduce_sum_square_func_body)));
+    OpSchema().FillUsing(ReduceFunctionOp("sum square", EMPTY_ZERO, reduce_sum_square_func_body)))
 
-ONNX_OPERATOR_SET_SCHEMA(ReduceMean, 18, OpSchema().FillUsing(ReduceOpDynamicAxes("mean", EMPTY_UNDEFINED)));
+ONNX_OPERATOR_SET_SCHEMA(ReduceMean, 18, OpSchema().FillUsing(ReduceOpDynamicAxes("mean", EMPTY_UNDEFINED)))
 
-ONNX_OPERATOR_SET_SCHEMA(ReduceProd, 18, OpSchema().FillUsing(ReduceOpDynamicAxes("product", EMPTY_ONE)));
+ONNX_OPERATOR_SET_SCHEMA(ReduceProd, 18, OpSchema().FillUsing(ReduceOpDynamicAxes("product", EMPTY_ONE)))
 
 static const char* reduce_log_sum_func_body = R"ONNX(
   {
@@ -50,7 +47,7 @@ static const char* reduce_log_sum_func_body = R"ONNX(
 ONNX_OPERATOR_SET_SCHEMA(
     ReduceLogSum,
     18,
-    OpSchema().FillUsing(ReduceFunctionOp("log sum", EMPTY_MINUS_INF, reduce_log_sum_func_body)));
+    OpSchema().FillUsing(ReduceFunctionOp("log sum", EMPTY_MINUS_INF, reduce_log_sum_func_body)))
 
 static const char* reduce_log_sum_exp_func_body = R"ONNX(
   {
@@ -65,7 +62,7 @@ static const char* reduce_log_sum_exp_func_body = R"ONNX(
 ONNX_OPERATOR_SET_SCHEMA(
     ReduceLogSumExp,
     18,
-    OpSchema().FillUsing(ReduceFunctionOp("log sum exponent", EMPTY_MINUS_INF, reduce_log_sum_exp_func_body)));
+    OpSchema().FillUsing(ReduceFunctionOp("log sum exponent", EMPTY_MINUS_INF, reduce_log_sum_exp_func_body)))
 
 static const char* reduce_l1_func_body = R"ONNX(
   {
@@ -77,7 +74,7 @@ static const char* reduce_l1_func_body = R"ONNX(
 ONNX_OPERATOR_SET_SCHEMA(
     ReduceL1,
     18,
-    OpSchema().FillUsing(ReduceFunctionOp("L1 norm", EMPTY_ZERO, reduce_l1_func_body)));
+    OpSchema().FillUsing(ReduceFunctionOp("L1 norm", EMPTY_ZERO, reduce_l1_func_body)))
 
 static const char* reduce_l2_func_body = R"ONNX(
   {
@@ -92,7 +89,7 @@ static const char* reduce_l2_func_body = R"ONNX(
 ONNX_OPERATOR_SET_SCHEMA(
     ReduceL2,
     18,
-    OpSchema().FillUsing(ReduceFunctionOp("L2 norm", EMPTY_ZERO, reduce_l2_func_body)));
+    OpSchema().FillUsing(ReduceFunctionOp("L2 norm", EMPTY_ZERO, reduce_l2_func_body)))
 
 static std::function<void(OpSchema&)> ArgReduceDocGenerator(const char* name) {
   return [=](OpSchema& schema) {
@@ -177,8 +174,8 @@ The type of the output tensor is integer.)DOC";
   };
 }
 
-ONNX_OPERATOR_SET_SCHEMA(ArgMax, 13, OpSchema().FillUsing(ArgReduceDocGenerator("max")));
+ONNX_OPERATOR_SET_SCHEMA(ArgMax, 13, OpSchema().FillUsing(ArgReduceDocGenerator("max")))
 
-ONNX_OPERATOR_SET_SCHEMA(ArgMin, 13, OpSchema().FillUsing(ArgReduceDocGenerator("min")));
+ONNX_OPERATOR_SET_SCHEMA(ArgMin, 13, OpSchema().FillUsing(ArgReduceDocGenerator("min")))
 
 } // namespace ONNX_NAMESPACE

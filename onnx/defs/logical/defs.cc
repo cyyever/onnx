@@ -66,7 +66,7 @@ ONNX_OPERATOR_SET_SCHEMA(
     OpSchema()
         .FillUsing(BinaryLogicDocGenerator("and"))
         .TypeConstraint("T", {"tensor(bool)"}, "Constrain input to boolean tensor.")
-        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."));
+        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."))
 
 ONNX_OPERATOR_SET_SCHEMA(
     Or,
@@ -74,7 +74,7 @@ ONNX_OPERATOR_SET_SCHEMA(
     OpSchema()
         .FillUsing(BinaryLogicDocGenerator("or"))
         .TypeConstraint("T", {"tensor(bool)"}, "Constrain input to boolean tensor.")
-        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."));
+        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."))
 
 ONNX_OPERATOR_SET_SCHEMA(
     Xor,
@@ -82,7 +82,7 @@ ONNX_OPERATOR_SET_SCHEMA(
     OpSchema()
         .FillUsing(BinaryLogicDocGenerator("xor"))
         .TypeConstraint("T", {"tensor(bool)"}, "Constrain input to boolean tensor.")
-        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."));
+        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."))
 
 ONNX_OPERATOR_SET_SCHEMA(
     Greater,
@@ -90,7 +90,7 @@ ONNX_OPERATOR_SET_SCHEMA(
     OpSchema()
         .FillUsing(BinaryLogicDocGenerator("greater"))
         .TypeConstraint("T", OpSchema::all_numeric_types_ir4(), "Constrain input types to all numeric tensors.")
-        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."));
+        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."))
 
 ONNX_OPERATOR_SET_SCHEMA(
     Less,
@@ -98,7 +98,7 @@ ONNX_OPERATOR_SET_SCHEMA(
     OpSchema()
         .FillUsing(BinaryLogicDocGenerator("less"))
         .TypeConstraint("T", OpSchema::all_numeric_types_ir4(), "Constrain input types to all numeric tensors.")
-        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."));
+        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."))
 
 ONNX_OPERATOR_SET_SCHEMA(
     Equal,
@@ -122,7 +122,7 @@ ONNX_OPERATOR_SET_SCHEMA(
              "tensor(bfloat16)",
              "tensor(string)"},
             "Constrain input types to all (non-complex) tensors.")
-        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."));
+        .TypeConstraint("T1", {"tensor(bool)"}, "Constrain output to boolean tensor."))
 
 static const char* Not_ver1_doc = R"DOC(
 Returns the negation of the input tensor element-wise.
@@ -136,7 +136,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .Input(0, "X", "Input tensor", "T", OpSchema::Single, true, 1, OpSchema::NonDifferentiable)
         .Output(0, "Y", "Output tensor", "T", OpSchema::Single, true, 1, OpSchema::NonDifferentiable)
         .TypeConstraint("T", {"tensor(bool)"}, "Constrain input/output to boolean tensors.")
-        .TypeAndShapeInferenceFunction(unaryLogicalOpInference));
+        .TypeAndShapeInferenceFunction(unaryLogicalOpInference))
 
 static const char* BitShift_ver11_doc = R"DOC(
 Bitwise shift operator performs element-wise operation. For each input element, if the
@@ -186,7 +186,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                 ctx.getInputType(0)->tensor_type().shape(),
                 ctx.getInputType(1)->tensor_type().shape(),
                 *ctx.getOutputType(0)->mutable_tensor_type()->mutable_shape());
-        }));
+        }))
 
 ONNX_OPERATOR_SET_SCHEMA(
     LessOrEqual,
@@ -202,7 +202,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             O2 = Equal (A, B)
             C = Or (O1, O2)
         }
-        )ONNX"));
+        )ONNX"))
 
 ONNX_OPERATOR_SET_SCHEMA(
     GreaterOrEqual,
@@ -218,7 +218,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             O2 = Equal (A, B)
             C = Or (O1, O2)
         }
-        )ONNX"));
+        )ONNX"))
 
 static const char* BitwiseNot_ver18_doc = R"DOC(
 Returns the bitwise not of the input tensor element-wise.
@@ -242,7 +242,7 @@ ONNX_OPERATOR_SET_SCHEMA(
              "tensor(int32)",
              "tensor(int64)"},
             "Constrain input/output to integer tensors.")
-        .TypeAndShapeInferenceFunction(propagateShapeAndTypeFromFirstInput));
+        .TypeAndShapeInferenceFunction(propagateShapeAndTypeFromFirstInput))
 
 static std::function<void(OpSchema&)> BinaryBitwiseDocGenerator(const char* name) {
   return [=](OpSchema& schema) {
@@ -303,7 +303,7 @@ ONNX_OPERATOR_SET_SCHEMA(
              "tensor(int16)",
              "tensor(int32)",
              "tensor(int64)"},
-            "Constrain input to integer tensors."));
+            "Constrain input to integer tensors."))
 
 ONNX_OPERATOR_SET_SCHEMA(
     BitwiseOr,
@@ -320,7 +320,7 @@ ONNX_OPERATOR_SET_SCHEMA(
              "tensor(int16)",
              "tensor(int32)",
              "tensor(int64)"},
-            "Constrain input to integer tensors."));
+            "Constrain input to integer tensors."))
 
 ONNX_OPERATOR_SET_SCHEMA(
     BitwiseXor,
@@ -337,6 +337,6 @@ ONNX_OPERATOR_SET_SCHEMA(
              "tensor(int16)",
              "tensor(int32)",
              "tensor(int64)"},
-            "Constrain input to integer tensors."));
+            "Constrain input to integer tensors."))
 
 } // namespace ONNX_NAMESPACE

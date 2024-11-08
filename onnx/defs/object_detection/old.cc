@@ -122,7 +122,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           // set output shape:
           updateOutputShape(ctx, 0, {num_rois, C, ht, width});
-        }));
+        }))
 
 static const char* RoiAlign_ver10_doc = R"DOC(
 Region of Interest (RoI) align operation described in the
@@ -231,7 +231,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           // set output shape:
           updateOutputShape(ctx, 0, {num_rois, C, ht, width});
-        }));
+        }))
 
 static const char* NonMaxSuppression_ver10_doc = R"DOC(
 Filter out boxes that have high intersection-over-union (IOU) overlap with previously selected boxes.
@@ -288,6 +288,6 @@ ONNX_OPERATOR_SET_SCHEMA(
         .TypeAndShapeInferenceFunction([](InferenceContext& ctx) {
           auto selected_indices_type = ctx.getOutputType(0)->mutable_tensor_type();
           selected_indices_type->set_elem_type(::ONNX_NAMESPACE::TensorProto_DataType::TensorProto_DataType_INT64);
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE

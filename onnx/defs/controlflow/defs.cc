@@ -66,7 +66,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             control_flow_types_ir11(),
             "All Tensor, Sequence(Tensor), Optional(Tensor), and Optional(Sequence(Tensor)) types up to IRv11.")
         .TypeConstraint("B", {"tensor(bool)"}, "Only bool")
-        .TypeAndShapeInferenceFunction(IfInferenceFunction));
+        .TypeAndShapeInferenceFunction(IfInferenceFunction))
 
 static const char* Loop_ver16_doc = R"DOC(
 Generic Looping construct. This loop has multiple termination conditions:
@@ -257,7 +257,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "All Tensor, Sequence(Tensor), Optional(Tensor), and Optional(Sequence(Tensor)) types up to IRv11.")
         .TypeConstraint("I", {"tensor(int64)"}, "tensor of int64, which should be a scalar.")
         .TypeConstraint("B", {"tensor(bool)"}, "tensor of bool, which should be a scalar.")
-        .TypeAndShapeInferenceFunction(LoopInferenceFunction));
+        .TypeAndShapeInferenceFunction(LoopInferenceFunction))
 
 static const char* scan_16_doc = R"DOC(
 Scan can be used to iterate over one or more scan_input tensors,
@@ -449,6 +449,6 @@ ONNX_OPERATOR_SET_SCHEMA(
             AttributeProto::INTS,
             false)
         .TypeConstraint("V", OpSchema::all_tensor_types_ir11(), "All Tensor types up to IRv11.")
-        .TypeAndShapeInferenceFunction(ScanInferenceFunction)); // Shares same shape inference as opset 11
+        .TypeAndShapeInferenceFunction(ScanInferenceFunction)) // Shares same shape inference as opset 11
 
 } // namespace ONNX_NAMESPACE

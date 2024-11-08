@@ -39,7 +39,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
           ctx.getOutputType(0)->mutable_sequence_type()->mutable_elem_type()->mutable_tensor_type()->set_elem_type(
               elem_type);
-        }));
+        }))
 
 static const char* SequenceConstruct_ver11_doc = R"DOC(
 Construct a tensor sequence containing 'inputs' tensors.
@@ -91,7 +91,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             const auto& input_shape = ctx.getInputType(i)->tensor_type().shape();
             UnionShapeInfo(input_shape, *output_tensor_type);
           }
-        }));
+        }))
 
 static const char* SequenceInsert_ver11_doc = R"DOC(
 Outputs a tensor sequence that inserts 'tensor' into 'input_sequence' at 'position'.
@@ -154,7 +154,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           *(output_tensor_type->mutable_shape()) = input0_type->sequence_type().elem_type().tensor_type().shape();
 
           UnionShapeInfo(input1_type->tensor_type().shape(), *output_tensor_type);
-        }));
+        }))
 
 static const char* SequenceAt_ver11_doc = R"DOC(
 Outputs a tensor copy from the tensor at 'position' in 'input_sequence'.
@@ -191,7 +191,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             fail_type_inference("Input type for input at index 0 is null. Type info is expected.");
           }
           ctx.getOutputType(0)->CopyFrom(input0_type->sequence_type().elem_type());
-        }));
+        }))
 
 static const char* SequenceErase_ver11_doc = R"DOC(
 Outputs a tensor sequence that removes the tensor at 'position' from 'input_sequence'.
@@ -229,7 +229,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             fail_type_inference("Input type for input at index 0 is null. Type info is expected.")
           }
           ctx.getOutputType(0)->CopyFrom(*input0_type);
-        }));
+        }))
 
 static const char* SequenceLength_ver11_doc = R"DOC(
 Produces a scalar(tensor of empty shape) containing the number of tensors in 'input_sequence'.
@@ -251,7 +251,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           auto* output_tensor_type = ctx.getOutputType(0)->mutable_tensor_type();
           output_tensor_type->set_elem_type(TensorProto::INT64);
           output_tensor_type->mutable_shape()->Clear();
-        }));
+        }))
 
 // Updated operators that consume/produce sequence of tensors.
 
@@ -423,7 +423,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               }
             }
           }
-        }));
+        }))
 
 static const char* ConcatFromSequence_ver11_doc = R"DOC(
 Concatenate a sequence of tensors into a single tensor.
@@ -508,7 +508,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               output_shape->mutable_dim(i)->CopyFrom(input_shape.dim((i > axis && new_axis) ? i - 1 : i));
             }
           }
-        }));
+        }))
 
 static const char* SequenceMap_ver17_doc = R"DOC(
 Applies a sub-graph to each sample in the input sequence(s).
@@ -781,6 +781,6 @@ ONNX_OPERATOR_SET_SCHEMA(
             }(),
             "Constrain to any tensor or sequence type.")
         .SetContextDependentFunctionBodyBuilder(BuildSequenceMapBodyFunc)
-        .TypeAndShapeInferenceFunction(SequenceMapInferenceFunction));
+        .TypeAndShapeInferenceFunction(SequenceMapInferenceFunction))
 
 } // namespace ONNX_NAMESPACE

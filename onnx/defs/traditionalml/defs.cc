@@ -70,7 +70,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
         .TypeConstraint(
             "T",
             {"tensor(float)", "tensor(double)", "tensor(int64)", "tensor(int32)", "tensor(string)"},
-            "The input must be a tensor of a numeric type or string. The output will be of the same tensor type."));
+            "The input must be a tensor of a numeric type or string. The output will be of the same tensor type."))
 
 static const char* Binarizer_ver1_doc = R"DOC(
     Maps the values of the input tensor to either 0 or 1, element-wise, based on the outcome of a comparison against a threshold value.
@@ -88,7 +88,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             {"tensor(float)", "tensor(double)", "tensor(int64)", "tensor(int32)"},
             "The input must be a tensor of a numeric type. The output will be of the same tensor type.")
         .Attr("threshold", "Values greater than this are mapped to 1, others to 0.", AttributeProto::FLOAT, 0.f)
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { propagateShapeAndTypeFromFirstInput(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { propagateShapeAndTypeFromFirstInput(ctx); }))
 
 static const char* CastMap_ver1_doc = R"DOC(
     Converts a map to a tensor.<br>The map key must be an int64 and the values will be ordered
@@ -143,7 +143,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           } else if (0 == cast_to.compare("TO_STRING")) {
             output_type->set_elem_type(TensorProto::STRING);
           }
-        }));
+        }))
 
 static const char* CategoryMapper_ver1_doc = R"DOC(
     Converts strings to integers and vice versa.<br>
@@ -205,7 +205,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           if (hasInputShape(ctx, 0)) {
             propagateShapeFromInputToOutput(ctx, 0, 0);
           }
-        }));
+        }))
 
 static const char* DictVectorizer_ver1_doc = R"DOC(
     Uses an index mapping to convert a dictionary to an array.<br>
@@ -257,7 +257,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           auto input_elem_type = ctx.getInputType(0)->map_type().value_type().tensor_type().elem_type();
           auto output_elem_type = ctx.getOutputType(0)->mutable_tensor_type();
           output_elem_type->set_elem_type(input_elem_type);
-        }));
+        }))
 
 static const char* FeatureVectorizer_ver1_doc = R"DOC(
     Concatenates input tensors into one continuous output.<br>
@@ -277,7 +277,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "T1",
             {"tensor(int32)", "tensor(int64)", "tensor(float)", "tensor(double)"},
             "The input type must be a tensor of a numeric type.")
-        .Attr("inputdimensions", "The size of each input in the input list", AttributeProto::INTS, OPTIONAL_VALUE));
+        .Attr("inputdimensions", "The size of each input in the input list", AttributeProto::INTS, OPTIONAL_VALUE))
 
 static const char* Imputer_ver1_doc = R"DOC(
     Replaces inputs that equal one value with another, leaving all other elements alone.<br>
@@ -305,7 +305,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
         .Attr("imputed_value_floats", "Value(s) to change to", AttributeProto::FLOATS, OPTIONAL_VALUE)
         .Attr("replaced_value_float", "A value that needs replacing.", AttributeProto::FLOAT, 0.f)
         .Attr("imputed_value_int64s", "Value(s) to change to.", AttributeProto::INTS, OPTIONAL_VALUE)
-        .Attr("replaced_value_int64", "A value that needs replacing.", AttributeProto::INT, static_cast<int64_t>(0)));
+        .Attr("replaced_value_int64", "A value that needs replacing.", AttributeProto::INT, static_cast<int64_t>(0)))
 
 static const char* LabelEncoder_ver4_doc = R"DOC(
     Maps each element in the input tensor to another value.<br>
@@ -420,7 +420,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           // Propagate shape from input type and assign output type based on value type
           ctx.getOutputType(0)->mutable_tensor_type()->set_elem_type(value_type);
           propagateShapeFromInputToOutput(ctx, 0, 0);
-        }));
+        }))
 
 static const char* LinearClassifier_ver1_doc = R"DOC(
     Linear classifier
@@ -517,7 +517,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
 
           updateOutputShape(ctx, 0, {batch_size_dim});
           updateOutputShape(ctx, 1, {batch_size_dim, class_count_dim});
-        }));
+        }))
 
 static const char* LinearRegressor_ver1_doc = R"DOC(
     Generalized linear regression evaluation.<br>
@@ -551,7 +551,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "targets",
             "The total number of regression targets, 1 if not defined.",
             AttributeProto::INT,
-            static_cast<int64_t>(1)));
+            static_cast<int64_t>(1)))
 
 static const char* Normalizer_ver1_doc = R"DOC(
     Normalize the input.  There are three normalization modes, which have the corresponding formulas,
@@ -577,7 +577,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "T",
             {"tensor(float)", "tensor(double)", "tensor(int64)", "tensor(int32)"},
             "The input must be a tensor of a numeric type.")
-        .Attr("norm", "One of 'MAX,' 'L1,' 'L2'", AttributeProto::STRING, std::string("MAX")));
+        .Attr("norm", "One of 'MAX,' 'L1,' 'L2'", AttributeProto::STRING, std::string("MAX")))
 
 static const char* OneHotEncoder_ver1_doc = R"DOC(
     Replace each input element with an array of ones and zeros, where a single
@@ -632,7 +632,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           }
           shape->add_dim()->set_dim_value(std::max(cats_int64s.size(), cats_strings.size()));
           updateOutputElemType(ctx, 0, TensorProto::FLOAT);
-        }));
+        }))
 
 static const char* Scaler_ver1_doc = R"DOC(
     Rescale input data, for example to standardize features by removing the mean and scaling to unit variance.
@@ -660,7 +660,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "Second, multiply by this.<br>Can be length of features in an [N,F] tensor or length 1, in which case it "
             "applies to all features, regardless of dimension count.<br>Must be same length as 'offset'",
             AttributeProto::FLOATS,
-            OPTIONAL_VALUE));
+            OPTIONAL_VALUE))
 
 static const char* SVMClassifier_ver1_doc = R"DOC(
     Support Vector Machine classifier
@@ -737,7 +737,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           } else {
             output_elem_type->set_elem_type(TensorProto::INT64);
           }
-        }));
+        }))
 
 static const char* SVMRegressor_ver1_doc = R"DOC(
     Support Vector Machine regression prediction and one-class SVM anomaly detection.
@@ -778,7 +778,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "or 'PROBIT.'",
             AttributeProto::STRING,
             std::string("NONE"))
-        .Attr("rho", "", AttributeProto::FLOATS, OPTIONAL_VALUE));
+        .Attr("rho", "", AttributeProto::FLOATS, OPTIONAL_VALUE))
 
 static const char* TreeEnsembleClassifier_ver5_doc = R"DOC(
     This operator is DEPRECATED. Please use TreeEnsemble with provides similar functionality.
@@ -895,7 +895,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "Base values for classification, added to final class score; the size must be the same as the classes or "
             "can be left unassigned (assumed 0)",
             AttributeProto::TENSOR,
-            OPTIONAL_VALUE));
+            OPTIONAL_VALUE))
 
 static const char* TreeEnsembleRegressor_ver5_doc = R"DOC(
     This operator is DEPRECATED. Please use TreeEnsemble instead which provides the same
@@ -996,7 +996,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
             "Base values for regression, added to final prediction after applying aggregate_function; the size must be "
             "the same as the classes or can be left unassigned (assumed 0)",
             AttributeProto::TENSOR,
-            OPTIONAL_VALUE));
+            OPTIONAL_VALUE))
 
 static const char* TreeEnsemble_ver5_doc = R"DOC(
     Tree Ensemble operator.  Returns the regressed values for each input in a batch.
@@ -1128,7 +1128,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
                 "Attribute 'nodes_splits' must have same type as input. Input type is ",
                 input_type,
                 " and attribute type is ",
-                nodes_splits->t().data_type());
+                nodes_splits->t().data_type())
           }
 
           // Expected nodes_* length
@@ -1158,7 +1158,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
                 "Attribute 'membership_values' must have same type as input. Input type is ",
                 input_type,
                 " and attribute type is ",
-                membership_values->t().data_type());
+                membership_values->t().data_type())
           }
           AssertAttributeProtoTypeAndLength(
               ctx.getAttribute("nodes_splits"), expected_length, static_cast<TensorProto_DataType>(input_type), true);
@@ -1173,7 +1173,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
                   "length is ",
                   leaf_targetids->ints_size(),
                   " and 'leaf_weights' length is ",
-                  leaf_weights->t().dims(0));
+                  leaf_weights->t().dims(0))
             }
           } else {
             fail_shape_inference("Attributes 'leaf_targetids' and 'leaf_weights' must both be set.");
@@ -1185,7 +1185,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
                 "Attribute 'leaf_weights' must have same type as input. Input type is ",
                 input_type,
                 " and attribute type is ",
-                leaf_weights->t().data_type());
+                leaf_weights->t().data_type())
           }
 
           checkInputRank(ctx, 0, 2);
@@ -1197,7 +1197,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           }
           updateOutputElemType(ctx, 0, input_type);
           updateOutputShape(ctx, 0, {N, E});
-        }));
+        }))
 
 static const char* ZipMap_ver1_doc = R"DOC(
     Creates a map from the input and the attributes.<br>
@@ -1245,7 +1245,7 @@ ONNX_ML_OPERATOR_SET_SCHEMA(
           if (result && !classlabels_int64s.empty()) {
             output_map_type->set_key_type(TensorProto::INT64);
           }
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE
 #endif

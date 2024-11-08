@@ -279,7 +279,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             true,
             1,
             OpSchema::Differentiable)
-        .FillUsing(RNNDocGenerator_opset14("GRU")));
+        .FillUsing(RNNDocGenerator_opset14("GRU")))
 
 static const char* LSTM_ver14_doc = R"DOC(
 Computes an one-layer LSTM. This operator is usually supported via some
@@ -428,7 +428,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             OpSchema::Optional,
             true,
             1,
-            OpSchema::Differentiable));
+            OpSchema::Differentiable))
 
 static const char* RNN_ver14_doc = R"DOC(
 Computes an one-layer simple RNN. This operator is usually supported
@@ -518,7 +518,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             true,
             1,
             OpSchema::Differentiable)
-        .FillUsing(RNNDocGenerator_opset14("RNN")));
+        .FillUsing(RNNDocGenerator_opset14("RNN")))
 
 static std::function<void(OpSchema&)> RNNDocGeneratorOld(const char* /*name*/) {
   return [=](OpSchema& schema) {
@@ -709,7 +709,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "- assumed to be 0",
             "T",
             OpSchema::Optional)
-        .FillUsing(RNNDocGeneratorOld("GRU")));
+        .FillUsing(RNNDocGeneratorOld("GRU")))
 
 // Versions 1 to 6 of RNN/LSTM and versions 3 to 6 of GRU:
 
@@ -943,7 +943,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "to be 0.",
             "T",
             OpSchema::Optional)
-        .FillUsing(RNNDocGenerator1("RNN")));
+        .FillUsing(RNNDocGenerator1("RNN")))
 
 static const char* GRU_ver3_doc = R"DOC(
 Computes an one-layer GRU. This operator is usually supported via some custom
@@ -1063,7 +1063,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "- assumed to be 0",
             "T",
             OpSchema::Optional)
-        .FillUsing(RNNDocGenerator1("GRU")));
+        .FillUsing(RNNDocGenerator1("GRU")))
 
 static const char* LSTM_ver1_doc = R"DOC(
 Computes an one-layer LSTM. This operator is usually supported via some
@@ -1212,7 +1212,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "The last output value of the cell. It has shape "
             "`[num_directions, batch_size, hidden_size]`.",
             "T",
-            OpSchema::Optional));
+            OpSchema::Optional))
 
 } // namespace ONNX_NAMESPACE
 
@@ -1436,7 +1436,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "to be 0.",
             "T",
             OpSchema::Optional)
-        .FillUsing(RNNDocGenerator2("RNN")));
+        .FillUsing(RNNDocGenerator2("RNN")))
 
 static const char* GRU_ver7_doc = R"DOC(
 Computes an one-layer GRU. This operator is usually supported via some custom
@@ -1556,7 +1556,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "- assumed to be 0",
             "T",
             OpSchema::Optional)
-        .FillUsing(RNNDocGenerator2("GRU")));
+        .FillUsing(RNNDocGenerator2("GRU")))
 
 static const char* LSTM_ver7_doc = R"DOC(
 Computes an one-layer LSTM. This operator is usually supported via some
@@ -1701,5 +1701,5 @@ ONNX_OPERATOR_SET_SCHEMA(
             "The last output value of the cell. It has shape "
             "`[num_directions, batch_size, hidden_size]`.",
             "T",
-            OpSchema::Optional));
+            OpSchema::Optional))
 } // namespace ONNX_NAMESPACE

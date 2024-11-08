@@ -64,7 +64,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           } else {
             fail_type_inference("Optional is expected to have either an input or the type attribute set.");
           }
-        }));
+        }))
 
 static const char* OptionalHasElement_ver18_doc = R"DOC(
 Returns true if (1) the input is an optional-type and contains an element,
@@ -100,7 +100,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           auto* output_tensor_type = ctx.getOutputType(0)->mutable_tensor_type();
           output_tensor_type->set_elem_type(TensorProto::BOOL);
           output_tensor_type->mutable_shape()->Clear();
-        }));
+        }))
 
 static const char* OptionalGetElement_ver18_doc = R"DOC(
 If the input is a tensor or sequence type, it returns the input.
@@ -145,6 +145,6 @@ ONNX_OPERATOR_SET_SCHEMA(
           } else {
             propagateShapeAndTypeFromFirstInput(ctx);
           }
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE

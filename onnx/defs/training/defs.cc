@@ -2,10 +2,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <algorithm>
 #include <cmath>
 
-#include "onnx/defs/function.h"
 #include "onnx/defs/schema.h"
 
 namespace ONNX_NAMESPACE {
@@ -191,7 +189,7 @@ ONNX_PREVIEW_TRAINING_OPERATOR_SET_SCHEMA(
         .TypeConstraint(
             "T2",
             {"tensor(float16)", "tensor(float)", "tensor(double)"},
-            "Allow inputs to be any kind of floating-point tensor."));
+            "Allow inputs to be any kind of floating-point tensor."))
 
 static const char* Adagrad_ver1_doc = R"DOC(
     Compute one iteration of ADAGRAD, a stochastic gradient based optimization
@@ -317,7 +315,7 @@ ONNX_PREVIEW_TRAINING_OPERATOR_SET_SCHEMA(
             propagateElemTypeFromInputToOutput(ctx, i_in, i_out);
             propagateShapeFromInputToOutput(ctx, i_in, i_out);
           }
-        }));
+        }))
 
 static const char* Momentum_ver1_doc = R"DOC(
     Compute one iteration of stochastic gradient update with momentum.
@@ -453,7 +451,7 @@ ONNX_PREVIEW_TRAINING_OPERATOR_SET_SCHEMA(
             propagateElemTypeFromInputToOutput(ctx, i_in, i_out);
             propagateShapeFromInputToOutput(ctx, i_in, i_out);
           }
-        }));
+        }))
 
 static const char* Adam_ver1_doc = R"DOC(
     Compute one iteration of Adam, a stochastic gradient based optimization
@@ -619,6 +617,6 @@ ONNX_PREVIEW_TRAINING_OPERATOR_SET_SCHEMA(
             propagateElemTypeFromInputToOutput(ctx, i_in, i_out);
             propagateShapeFromInputToOutput(ctx, i_in, i_out);
           }
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE

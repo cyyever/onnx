@@ -31,7 +31,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                 ctx.getInputType(0)->tensor_type().shape(),
                 ctx.getInputType(1)->tensor_type().shape(),
                 *ctx.getOutputType(0)->mutable_tensor_type()->mutable_shape());
-        }));
+        }))
 
 static const char* RegexFullMatch_doc =
     R"DOC(RegexFullMatch performs a full regex match on each element of the input tensor. If an element fully matches the regex pattern specified as an attribute, the corresponding element in the output is True and it is False otherwise. [RE2](https://github.com/google/re2/wiki/Syntax) regex syntax is used.)DOC";
@@ -59,7 +59,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .TypeAndShapeInferenceFunction([](InferenceContext& ctx) {
           updateOutputElemType(ctx, 0, TensorProto::BOOL);
           propagateShapeFromInputToOutput(ctx, 0, 0);
-        }));
+        }))
 
 static const char* StringSplit_doc =
     R"DOC(StringSplit splits a string tensor's elements into substrings based on a delimiter attribute and a maxsplit attribute.
@@ -126,7 +126,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           // results.
           ctx.getOutputType(1)->mutable_tensor_type()->set_elem_type(TensorProto::INT64);
           propagateShapeFromInputToOutput(ctx, 0, 1);
-        }));
+        }))
 
 static const char* StringNormalizer_ver10_doc = R"DOC(
 StringNormalization performs string operations for basic cleaning.
@@ -195,5 +195,5 @@ ONNX_OPERATOR_SET_SCHEMA(
             fail_shape_inference("Input shape must have either [C] or [1,C] dimensions where C > 0");
           }
           updateOutputShape(ctx, 0, output_shape);
-        }));
+        }))
 } // namespace ONNX_NAMESPACE

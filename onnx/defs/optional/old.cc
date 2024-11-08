@@ -37,7 +37,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           auto* output_tensor_type = ctx.getOutputType(0)->mutable_tensor_type();
           output_tensor_type->set_elem_type(TensorProto::BOOL);
           output_tensor_type->mutable_shape()->Clear();
-        }));
+        }))
 
 static const char* OptionalGetElement_ver1_doc = R"DOC(
 Outputs the element in the optional-type input. It is an error if the input value does not have an element
@@ -77,6 +77,6 @@ ONNX_OPERATOR_SET_SCHEMA(
             fail_type_inference("Input must be an optional-type value containing an element with type information.");
           }
           ctx.getOutputType(0)->CopyFrom(input_type->optional_type().elem_type());
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE

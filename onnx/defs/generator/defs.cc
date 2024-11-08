@@ -57,7 +57,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             false)
         .Output(0, "output", "Output tensor containing the same value of the provided tensor.", "T")
         .TypeConstraint("T", OpSchema::all_tensor_types_ir11(), "Constrain input and output types to all tensor types.")
-        .TypeAndShapeInferenceFunction(ConstantOpInference));
+        .TypeAndShapeInferenceFunction(ConstantOpInference))
 
 static const char* ConstantOfShape_ver20_doc = R"DOC(
 Generate a tensor with given value and shape.
@@ -109,7 +109,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (found) {
             *ctx.getOutputType(0)->mutable_tensor_type()->mutable_shape() = output_shape;
           }
-        }));
+        }))
 
 static const char* EyeLike_ver22_doc = R"DOC(
 Generate a 2D tensor (matrix) with ones on the diagonal and zeros everywhere else. Only 2D
@@ -163,7 +163,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             }
           }
           propagateShapeFromInputToOutput(ctx, 0, 0);
-        }));
+        }))
 
 static const char* RandomUniform_ver22_doc = R"DOC(
 Generate a tensor with random values drawn from a uniform distribution. The shape
@@ -197,7 +197,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .TypeAndShapeInferenceFunction([](InferenceContext& ctx) {
           propagateElemTypeFromAttributeToOutput(ctx, "dtype", 0, TensorProto::FLOAT);
           propagateShapeFromAttributeToOutput(ctx, "shape", 0);
-        }));
+        }))
 
 static const char* RandomNormal_ver22_doc = R"DOC(
 Generate a tensor with random values drawn from a normal distribution. The shape
@@ -232,7 +232,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .TypeAndShapeInferenceFunction([](InferenceContext& ctx) {
           propagateElemTypeFromAttributeToOutput(ctx, "dtype", 0, TensorProto::FLOAT);
           propagateShapeFromAttributeToOutput(ctx, "shape", 0);
-        }));
+        }))
 
 static const char* RandomUniformLike_ver22_doc = R"DOC(
 Generate a tensor with random values drawn from a uniform distribution.
@@ -278,7 +278,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             return;
           }
           propagateShapeFromInputToOutput(ctx, 0, 0);
-        }));
+        }))
 
 static const char* RandomNormalLike_ver22_doc = R"DOC(
 Generate a tensor with random values drawn from a normal distribution.
@@ -324,7 +324,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             return;
           }
           propagateShapeFromInputToOutput(ctx, 0, 0);
-        }));
+        }))
 
 static const char* Multinomial_ver22_doc = R"DOC(
 Generate a tensor of samples from a multinomial distribution according to the probabilities
@@ -381,7 +381,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           } // else statically-unknown batch-size
           sample_size.set_dim_value(getAttribute(ctx, "sample_size", 1));
           updateOutputShape(ctx, 0, {batch_size, sample_size});
-        }));
+        }))
 
 static const char* Range_ver11_doc = R"DOC(
 Generate a tensor containing a sequence of numbers that begin at `start` and extends by increments of `delta`
@@ -508,7 +508,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
             return;
           }
-        }));
+        }))
 
 static const char* Bernoulli_ver22_doc = R"DOC(
 Draws binary random numbers (0 or 1) from a Bernoulli distribution. The input tensor should be a tensor
@@ -572,5 +572,5 @@ ONNX_OPERATOR_SET_SCHEMA(
                   .Add("output = Cast (X_greater)", "to", int64_t(dtype));
               schema.BuildFunction(functionProto);
               return true;
-            }));
+            }))
 } // namespace ONNX_NAMESPACE

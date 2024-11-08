@@ -2,7 +2,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "onnx/defs/function.h"
 #include "onnx/defs/schema.h"
 
 namespace ONNX_NAMESPACE {
@@ -126,7 +125,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* DequantizeLinear_ver21_doc = R"DOC(
 The linear dequantization operator. It consumes a quantized tensor, a scale, and a zero point to compute the
@@ -201,7 +200,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* QuantizeLinear_ver19_doc = R"DOC(
 The linear quantization operator. It consumes a high precision tensor, a scale, and a zero point to compute the low precision / quantized tensor.
@@ -273,7 +272,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* DequantizeLinear_ver19_doc = R"DOC(
 The linear dequantization operator. It consumes a quantized tensor, a scale, and a zero point to compute the full precision tensor.
@@ -334,7 +333,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* QuantizeLinear_ver13_doc = R"DOC(
 The linear quantization operator. It consumes a high precision tensor, a scale, and a zero point to compute the low precision / quantized tensor.
@@ -385,7 +384,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* DequantizeLinear_ver13_doc = R"DOC(
 The linear dequantization operator. It consumes a quantized tensor, a scale, and a zero point to compute the full precision tensor.
@@ -434,7 +433,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* QuantizeLinear_ver10_doc = R"DOC(
 The linear per-tensor/layer quantization operator. It consumes a high precision tensor, a scale, a zero point to compute the low precision / quantized tensor.
@@ -478,7 +477,7 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 static const char* DequantizeLinear_ver10_doc = R"DOC(
 The linear dequantization operator. It consumes a quantized tensor, a scale, a zero point to compute the full precision tensor.
@@ -520,6 +519,6 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           auto& input_shape = getInputShape(ctx, 0);
           updateOutputShape(ctx, 0, input_shape);
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE

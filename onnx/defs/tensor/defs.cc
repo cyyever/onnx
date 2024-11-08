@@ -126,7 +126,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         })
         .PartialDataPropagationFunction([](DataPropagationContext& ctx) {
           PropagateShapeDataFromInputToOutput(ctx, 0);
-        }));
+        }))
 
 static const char* CastLike_ver21_doc = R"DOC(
 The operator casts the elements of a given input tensor (the first input) to
@@ -194,7 +194,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                       .c_str());
               schema.BuildFunction(functionProto);
               return true;
-            }));
+            }))
 
 static const char* Reshape_ver19_doc = R"DOC(
 Reshape the input tensor similar to numpy.reshape.
@@ -358,7 +358,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               negativeOneDim->set_dim_value(inputProduct / outputProduct);
             }
           }
-        }));
+        }))
 
 static const char* Shape_ver19_doc = R"DOC(
 Takes a tensor as input and outputs an 1D int64 tensor containing the shape of the input tensor.
@@ -461,7 +461,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             }
             ctx.addOutputData(0, std::move(output_shape));
           }
-        }));
+        }))
 
 static const char* Size_ver19_doc = R"DOC(
 Takes a tensor as input and outputs a int64 scalar that equals to the total number of elements of the input tensor.
@@ -495,7 +495,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             tsp.mutable_dim()->Add()->set_dim_value(input_data->dim_size());
             ctx.addOutputData(0, std::move(tsp));
           }
-        }));
+        }))
 
 ONNX_OPERATOR_SET_SCHEMA(
     Concat,
@@ -597,7 +597,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (tsp.dim_size() > 0) {
             ctx.addOutputData(0, std::move(tsp));
           }
-        }));
+        }))
 
 static const char* Split_ver18_doc =
     R"DOC(Split a tensor into a list of tensors, along the specified 'axis'.
@@ -723,7 +723,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             *ctx.getOutputType(i)->mutable_tensor_type()->mutable_shape() = shape;
             ctx.getOutputType(i)->mutable_tensor_type()->mutable_shape()->mutable_dim(axis)->set_dim_value(split[i]);
           }
-        }));
+        }))
 
 static const char* Slice_ver13_doc = R"DOC(
 Produces a slice of the input tensor along multiple axes. Similar to numpy:
@@ -1056,7 +1056,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               ctx.addOutputData(0, std::move(tsp));
             }
           }
-        }));
+        }))
 
 static const char* Transpose_ver13_doc = R"DOC(
 Transpose the input tensor similar to numpy.transpose. For example, when
@@ -1127,7 +1127,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           for (int64_t i : perm) {
             appendSingleDimCopiedFromInputTypeToOutputType(ctx, 0, 0, static_cast<size_t>(i));
           }
-        }));
+        }))
 
 static const char* Scatter_ver11_doc = R"DOC(
 This operator is deprecated. Please use ScatterElements, which provides the same functionality.
@@ -1233,7 +1233,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (hasNInputShapes(ctx, 1)) {
             propagateShapeFromInputToOutput(ctx, 0, 0);
           }
-        }));
+        }))
 
 static const char* ScatterND_ver18_doc = R"DOC(
 ScatterND takes three inputs `data` tensor of rank r >= 1, `indices` tensor of rank q >= 1,
@@ -1354,7 +1354,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (hasNInputShapes(ctx, 1)) {
             propagateShapeFromInputToOutput(ctx, 0, 0);
           }
-        }));
+        }))
 
 static const char* ScatterElements_ver18_doc = R"DOC(
 ScatterElements takes three inputs `data`, `updates`, and `indices` of the same
@@ -1478,7 +1478,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (hasNInputShapes(ctx, 1)) {
             propagateShapeFromInputToOutput(ctx, 0, 0);
           }
-        }));
+        }))
 
 static const char* Gather_ver13_doc = R"DOC(
 Given `data` tensor of rank r >= 1, and `indices` tensor of rank q, gather
@@ -1587,7 +1587,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                 data_shape.dim(i - q + 1); // i < out_rank < q + r - 1
           }
         })
-        .PartialDataPropagationFunction([](DataPropagationContext& ctx) { GatherOp13DataPropagator(ctx); }));
+        .PartialDataPropagationFunction([](DataPropagationContext& ctx) { GatherOp13DataPropagator(ctx); }))
 
 static const char* GatherElements_ver13_doc = R"DOC(
 
@@ -1683,7 +1683,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (hasInputShape(ctx, 1)) {
             propagateShapeFromInputToOutput(ctx, 1, 0);
           }
-        }));
+        }))
 
 static const char* Squeeze_ver13_doc = R"DOC(
 Remove single-dimensional entries from the shape of a tensor.
@@ -1786,7 +1786,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         })
         .PartialDataPropagationFunction([](DataPropagationContext& ctx) {
           PropagateShapeDataFromInputToOutput(ctx, 0);
-        }));
+        }))
 
 static const char* Unsqueeze_ver13_doc = R"DOC(
 Insert single-dimensional entries to the shape of an input tensor (`data`).
@@ -1870,7 +1870,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         })
         .PartialDataPropagationFunction([](DataPropagationContext& ctx) {
           PropagateShapeDataFromInputToOutput(ctx, 0);
-        }));
+        }))
 
 static const char* SpaceToDepth_ver13_doc =
     R"DOC(SpaceToDepth rearranges blocks of spatial data into depth. More specifically,
@@ -1926,7 +1926,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               fail_shape_inference("Input tensor must be 4-dimensional");
             }
           }
-        }));
+        }))
 
 static const char* DepthToSpace_ver13_doc =
     R"DOC(DepthToSpace rearranges (permutes) data from depth into blocks of spatial data.
@@ -2007,7 +2007,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               fail_shape_inference("Input tensor must be 4-dimensional");
             }
           }
-        }));
+        }))
 
 static const char* Tile_ver13_doc =
     R"DOC(Constructs a tensor by tiling a given tensor.
@@ -2092,7 +2092,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             }
           }
           return;
-        }));
+        }))
 
 static const char* Upsample_ver10_doc = R"DOC(
 Upsample the input tensor.
@@ -2121,7 +2121,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .Output(0, "Y", "N-D tensor after resizing", "T", OpSchema::Single)
         .TypeConstraint("T", OpSchema::all_tensor_types(), "Constrain input 'X' and output 'Y' to all tensor types.")
         .SetDoc(Upsample_ver10_doc)
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { resizeShapeInference_opset7_to_10(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { resizeShapeInference_opset7_to_10(ctx); }))
 
 static const char* Resize_ver19_doc = R"DOC(
 Resize the input tensor. In general, it calculates every value in the output tensor as a weighted average of neighborhood (a.k.a. sampling locations) in the input tensor.
@@ -2306,7 +2306,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             {"tensor(float16)", "tensor(float)", "tensor(double)"},
             "Constrain roi type to float or double.")
         .SetDoc(Resize_ver19_doc)
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { resizeShapeInference_opset18_to_19(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { resizeShapeInference_opset18_to_19(ctx); }))
 
 static const char* GridSample_ver22_doc = R"DOC(
 Given an input `X` and a flow-field `grid`, computes the output `Y` using `X` values and pixel locations from the `grid`.
@@ -2401,7 +2401,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             "Constrain input `X` and output `Y` types to all tensor types.")
         .TypeConstraint("T2", OpSchema::all_float_types_ir4(), "Constrain grid types to float tensors.")
         .SetDoc(GridSample_ver22_doc)
-        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { gridSampleShapeInference(ctx); }));
+        .TypeAndShapeInferenceFunction([](InferenceContext& ctx) { gridSampleShapeInference(ctx); }))
 
 static const char* AffineGrid_ver20_doc = R"DOC(
 Generates a 2D or 3D flow field (sampling grid), given a batch of affine matrices theta
@@ -2683,7 +2683,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             *output_shape->add_dim() = W;
             output_shape->add_dim()->set_dim_value(3);
           }
-        }));
+        }))
 
 ONNX_OPERATOR_SET_SCHEMA(
     Identity,
@@ -2703,7 +2703,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               return t;
             }(),
             "Constrain input and output types to all tensor, sequence, and optional types.")
-        .TypeAndShapeInferenceFunction(propagateShapeAndTypeFromFirstInput));
+        .TypeAndShapeInferenceFunction(propagateShapeAndTypeFromFirstInput))
 
 static const char* Compress_ver11_doc = R"DOC(
     Selects slices from an input tensor along a given axis where condition evaluates to True for each axis index.
@@ -2776,7 +2776,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (!axisAttr) {
             updateOutputShape(ctx, 0, {Dim()});
           }
-        }));
+        }))
 
 static const char* OneHot_ver11_doc = R"DOC(
     Produces a one-hot tensor based on inputs.
@@ -2944,7 +2944,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               }
             }
           }
-        }));
+        }))
 
 ONNX_OPERATOR_SET_SCHEMA(
     IsNaN,
@@ -2960,7 +2960,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (hasInputShape(ctx, 0)) {
             propagateShapeFromInputToOutput(ctx, 0, 0);
           }
-        }));
+        }))
 
 ONNX_OPERATOR_SET_SCHEMA(
     IsInf,
@@ -2990,7 +2990,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           if (hasInputShape(ctx, 0)) {
             propagateShapeFromInputToOutput(ctx, 0, 0);
           }
-        }));
+        }))
 
 static const char* Where_ver16_doc = R"DOC(
 Return elements, either from X or Y, depending on condition.
@@ -3056,7 +3056,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             multidirectionalBroadcastShapeInference(
                 shapes, *ctx.getOutputType(0)->mutable_tensor_type()->mutable_shape());
           }
-        }));
+        }))
 
 ONNX_OPERATOR_SET_SCHEMA(
     NonZero,
@@ -3076,7 +3076,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
           output_shape.add_dim();
           updateOutputShape(ctx, 0, output_shape);
-        }));
+        }))
 
 static const char* ReverseSequence_ver10_doc = R"DOC(
 Reverse batch of sequences having different lengths specified by `sequence_lens`.
@@ -3154,7 +3154,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           }
 
           propagateShapeFromInputToOutput(ctx, 0, 0);
-        }));
+        }))
 
 static const char* Unique_ver11_doc = R"DOC(
 Find the unique elements of a tensor. When an optional attribute 'axis' is provided, unique subtensors sliced along the 'axis' are returned.
@@ -3389,7 +3389,7 @@ ONNX_OPERATOR_SET_SCHEMA(
               }
             }
           }
-        }));
+        }))
 
 static const char* GatherND_ver13_doc = R"DOC(
 Given `data` tensor of rank `r` >= 1, `indices` tensor of rank `q` >= 1, and `batch_dims` integer `b`, this operator gathers
@@ -3553,7 +3553,7 @@ ONNX_OPERATOR_SET_SCHEMA(
           for (int i = static_cast<int>(last_index_dimension); i < data_rank; ++i) {
             *ctx.getOutputType(0)->mutable_tensor_type()->mutable_shape()->add_dim() = data_shape.dim(i);
           }
-        }));
+        }))
 
 static const char* Pad_ver19_doc = R"DOC(
 Given a tensor containing the data to be padded (`data`), a tensor containing the number of start and end pad values for axis (`pads`), (optionally) a `mode`, and (optionally) `constant_value`,
@@ -3665,7 +3665,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         Pad_ver19_doc,
         "Supported modes: `constant`(default), `reflect`, `edge`, `wrap`",
         OpSchema::all_tensor_types_ir11(),
-        "Constrain input and output types to all tensor types up to IRv11.")));
+        "Constrain input and output types to all tensor types up to IRv11.")))
 
 static const char* Trilu_ver14_doc = R"DOC(
 Given a 2-D matrix or batches of 2-D matrices, returns the upper or lower triangular part of the tensor(s).
@@ -3733,7 +3733,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             }
             propagateShapeFromInputToOutput(ctx, 0, 0);
           }
-        }));
+        }))
 
 static const char* CenterCropPad_ver18_doc = R"DOC(
 Center crop or pad an input to given dimensions.
@@ -3900,6 +3900,6 @@ ONNX_OPERATOR_SET_SCHEMA(
 
           schema.BuildFunction(functionProto);
           return true;
-        }));
+        }))
 
 } // namespace ONNX_NAMESPACE
