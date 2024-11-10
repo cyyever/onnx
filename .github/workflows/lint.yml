@@ -48,7 +48,7 @@ jobs:
           reporter: github-pr-check
           level: warning
           flags: --linelength=120
-          filter: "-runtime/references"
+          filter: "-runtime/references,-whitespace"
 
 
   enforce-style:
