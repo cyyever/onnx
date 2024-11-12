@@ -656,7 +656,7 @@ else()
     target_compile_options(onnx_proto PRIVATE "-Wno-stringop-overflow")
   endif()
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(onnx PRIVATE -Wextra-semi -Wno-error=extra-semi)
+    target_compile_options(onnx PRIVATE -Wextra-semi)
   endif()
 endif()
 
