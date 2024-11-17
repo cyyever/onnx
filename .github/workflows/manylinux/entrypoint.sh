@@ -19,7 +19,7 @@ if [ "$(uname -m)" == "aarch64" ]; then
  PIP_INSTALL_COMMAND="$PY_VERSION -m pip install --only-binary google-re2 --no-cache-dir -q"
  PYTHON_COMMAND="$PY_VERSION"
 else
- declare -A python_map=( ["3.8"]="cp38-cp38" ["3.9"]="cp39-cp39" ["3.10"]="cp310-cp310" ["3.11"]="cp311-cp311" ["3.12"]="cp312-cp312")
+ declare -A python_map=( ["3.8"]="cp38-cp38" ["3.9"]="cp39-cp39" ["3.10"]="cp310-cp310" ["3.11"]="cp311-cp311" ["3.12"]="cp312-cp312" ["3.13"]="cp313-cp313")
  PY_VER=${python_map[$PY_VERSION]}
  PIP_INSTALL_COMMAND="/opt/python/${PY_VER}/bin/pip install --only-binary google-re2 --no-cache-dir -q"
  PYTHON_COMMAND="/opt/python/${PY_VER}/bin/python"
@@ -41,7 +41,7 @@ export CMAKE_ARGS="-DONNX_USE_LITE_PROTO=ON"
 $PIP_INSTALL_COMMAND -r requirements-release.txt || { echo "Installing Python requirements failed."; exit 1; }
 
 # Build wheels
-if [ "$GITHUB_EVENT_NAME" == "schedule" ]; then
+if [ "$GITHUB_EVENT_NAME" == "schedule" ] || [ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]; then
     sed -i 's/name = "onnx"/name = "onnx-weekly"/' 'pyproject.toml'
     ONNX_PREVIEW_BUILD=1 $PYTHON_COMMAND -m build --wheel || { echo "Building wheels failed."; exit 1; }
 else
