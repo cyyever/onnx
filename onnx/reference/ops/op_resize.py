@@ -123,7 +123,7 @@ def _linear_coeffs_antialias(ratio: float, scale: float) -> np.ndarray:
     footprint = 2 - 2 * start
     args = (np.arange(start, start + footprint) - ratio) * scale
     coeffs = np.clip(1 - np.abs(args), 0, 1)
-    return np.array(coeffs) / sum(coeffs)  # type: ignore[no-any-return]
+    return np.array(coeffs) / sum(coeffs)
 
 
 def _get_neighbor_idxes(x: float, n: int, limit: int) -> np.ndarray:
@@ -246,7 +246,7 @@ def _interpolate_1d_with_x(
                 coeffs[i] = 0
         coeffs /= sum(coeffs)
 
-    return np.dot(coeffs, points).item()  # type: ignore[no-any-return]
+    return np.dot(coeffs, points).item()
 
 
 def _interpolate_nd_with_x(
@@ -287,12 +287,12 @@ def _interpolate_nd_with_x(
         res1d.append(r)
 
     return _interpolate_1d_with_x(
-        res1d,  # type: ignore[arg-type]  # FIXME
+        res1d,
         scale_factors[0],
         output_size[0],
         x[0],
         get_coeffs,
-        roi=None if roi is None else [roi[0], roi[n]],  # type: ignore[arg-type]  # FIXME
+        roi=None if roi is None else [roi[0], roi[n]],
         exclude_outside=exclude_outside,
         **kwargs,
     )
@@ -300,9 +300,7 @@ def _interpolate_nd_with_x(
 
 def _get_all_coords(data: np.ndarray) -> np.ndarray:
     # FIXME: Fix input type
-    return _cartesian(
-        [list(range(data.shape[i])) for i in range(len(data.shape))]  # type: ignore[arg-type,misc]
-    )
+    return _cartesian([list(range(data.shape[i])) for i in range(len(data.shape))])
 
 
 def _interpolate_nd(
@@ -339,7 +337,7 @@ def _interpolate_nd(
             for i, d in enumerate(axes):
                 new_roi[d] = roi[i]
                 new_roi[r + d] = roi[naxes + i]
-            roi = new_roi  # type: ignore[assignment]  # FIXME
+            roi = new_roi
     else:
         axes = list(range(r))
 
@@ -366,7 +364,7 @@ def _interpolate_nd(
             ]
 
     else:
-        output_size = (scale_factors * np.array(data.shape)).astype(int)  # type: ignore[union-attr]
+        output_size = (scale_factors * np.array(data.shape)).astype(int)
 
     if scale_factors is None:
         raise ValueError("scale_factors is None.")
@@ -390,7 +388,7 @@ def _interpolate_nd(
 
 
 class Resize(OpRun):
-    def _run(  # type: ignore
+    def _run(
         self,
         X,
         roi,
@@ -439,8 +437,8 @@ class Resize(OpRun):
                 roi=roi,
                 keep_aspect_ratio_policy=keep_aspect_ratio_policy,
                 exclude_outside=exclude_outside,
-                coordinate_transformation_mode=coordinate_transformation_mode,  # type: ignore
-                extrapolation_value=extrapolation_value,  # type: ignore
+                coordinate_transformation_mode=coordinate_transformation_mode,
+                extrapolation_value=extrapolation_value,
             ).astype(X.dtype)
             return (output,)
 
@@ -460,14 +458,14 @@ class Resize(OpRun):
                 roi=roi,
                 keep_aspect_ratio_policy=keep_aspect_ratio_policy,
                 exclude_outside=exclude_outside,
-                coordinate_transformation_mode=coordinate_transformation_mode,  # type: ignore
-                extrapolation_value=extrapolation_value,  # type: ignore
+                coordinate_transformation_mode=coordinate_transformation_mode,
+                extrapolation_value=extrapolation_value,
             ).astype(X.dtype)
             if res is None:
                 res = np.empty((reshaped.shape[0], *output.shape), dtype=output.dtype)
             res[i] = output
 
-        res_reshaped = res.reshape(tuple(X.shape[a] for a in not_axes) + res[0].shape)  # type: ignore
+        res_reshaped = res.reshape(tuple(X.shape[a] for a in not_axes) + res[0].shape)
         new_perm = list(perm)
         for i, a in enumerate(perm):
             new_perm[a] = i

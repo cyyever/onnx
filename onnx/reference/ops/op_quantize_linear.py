@@ -183,23 +183,23 @@ class _CommonQuantizeLinear(OpRun):
 
         if tensor_type == TensorProto.FLOAT8E4M3FN:
             f8 = _CommonQuantizeLinear.float32_to_float8e4m3(x, saturate=saturate)
-            return (f8.astype(float8e4m3fn),)  # type: ignore[attr-defined]
+            return (f8.astype(float8e4m3fn),)
 
         if tensor_type == TensorProto.FLOAT8E4M3FNUZ:
             f8 = _CommonQuantizeLinear.float32_to_float8e4m3(
                 x, uz=True, saturate=saturate
             )
-            return (f8.astype(float8e4m3fnuz),)  # type: ignore[attr-defined]
+            return (f8.astype(float8e4m3fnuz),)
 
         if tensor_type == TensorProto.FLOAT8E5M2:
             f8 = _CommonQuantizeLinear.float32_to_float8e5m2(x, saturate=saturate)
-            return (f8.astype(float8e5m2),)  # type: ignore[attr-defined]
+            return (f8.astype(float8e5m2),)
 
         if tensor_type == TensorProto.FLOAT8E5M2FNUZ:
             f8 = _CommonQuantizeLinear.float32_to_float8e5m2(
                 x, fn=True, uz=True, saturate=saturate
             )
-            return (f8.astype(float8e5m2fnuz),)  # type: ignore[attr-defined]
+            return (f8.astype(float8e5m2fnuz),)
 
         if tensor_type in (TensorProto.UINT4, TensorProto.INT4):
             xi = np.rint(x).astype(np.int32)
@@ -209,12 +209,12 @@ class _CommonQuantizeLinear(OpRun):
             )
             func = np.vectorize(single_func)
             i4 = func(xi)
-            return (i4,)  # type: ignore[attr-defined]
+            return (i4,)
 
         if tensor_type == TensorProto.FLOAT4E2M1:
             x += zero_point
             f4 = subbyte.float32_to_float4e2m1_unpacked(x)
-            return (f4.astype(float4e2m1),)  # type: ignore[attr-defined]
+            return (f4.astype(float4e2m1),)
 
         raise ValueError(
             f"Unexpected type: output_dtype={tensor_type} is not a supported quantized type."
@@ -222,47 +222,22 @@ class _CommonQuantizeLinear(OpRun):
 
 
 class QuantizeLinear_10(_CommonQuantizeLinear):
-    def _run(self, x, y_scale, zero_point=None, axis=None):  # type: ignore
+    def _run(self, x, y_scale, zero_point=None, axis=None):
         if len(y_scale.shape) > 1:
             raise ValueError("Input 2 must be a vector or a number.")
-        return super()._run(x, y_scale, zero_point, axis=axis)  # type: ignore
+        return super()._run(x, y_scale, zero_point, axis=axis)
 
 
 class QuantizeLinear_19(_CommonQuantizeLinear):
-    def _run(self, x, y_scale, zero_point=None, axis=None, saturate=None):  # type: ignore
+    def _run(self, x, y_scale, zero_point=None, axis=None, saturate=None):
         if len(y_scale.shape) > 1:
             raise ValueError("Input 2 must be a vector or a number.")
-        return super()._run(x, y_scale, zero_point, axis=axis, saturate=saturate)  # type: ignore
+        return super()._run(x, y_scale, zero_point, axis=axis, saturate=saturate)
 
 
 class QuantizeLinear_21(_CommonQuantizeLinear):
-    def _run(self, *args, axis=None, saturate=None, block_size=None, output_dtype=None):  # type: ignore
-        # args: x, y_scale, zero_point
-        return super()._run(
-            *args,
-            axis=axis,
-            saturate=saturate,
-            block_size=block_size,
-            output_dtype=output_dtype,
-        )  # type: ignore
+    pass
 
 
 class QuantizeLinear_23(_CommonQuantizeLinear):
-    def _run(
-        self,
-        *args,
-        axis=None,
-        saturate=None,
-        block_size=None,
-        output_dtype=None,
-        precision=None,
-    ):  # type: ignore
-        # args: x, y_scale, zero_point
-        return super()._run(
-            *args,
-            axis=axis,
-            saturate=saturate,
-            block_size=block_size,
-            output_dtype=output_dtype,
-            precision=precision,
-        )  # type: ignore
+    pass
