@@ -32,8 +32,8 @@ class Device:
 
     def __init__(self, device: str) -> None:
         options = device.split(":")
-        self.type = getattr(DeviceType, options[0])
-        self.device_id = 0
+        self.type: DeviceType = getattr(DeviceType, options[0])
+        self.device_id: int = 0
         if len(options) > 1:
             self.device_id = int(options[1])
 
