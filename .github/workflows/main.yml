@@ -103,7 +103,7 @@ jobs:
         if: startsWith(matrix.os,'ubuntu')
         run: |
           if [ "${{ matrix.protobuf_type }}" == "External" ]; then
-            export CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DONNX_USE_PROTOBUF_SHARED_LIBS=ON"
+            export CMAKE_ARGS="$CMAKE_ARGS -DONNX_USE_PROTOBUF_SHARED_LIBS=ON"
           fi
           pip install -e ".[reference]" -v
         env:

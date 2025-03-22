@@ -4,7 +4,7 @@
 
 name: CI freethreading experimental
 
-# Note: actions/setup-python does not support 3.13t therefore 
+# Note: actions/setup-python does not support 3.13t therefore
 # Quansight-Labs/setup-python@v5 is used
 
 on:
@@ -32,7 +32,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-latest, windows-latest]
         python_version: ['3.13t']
-        include:        
+        include:
           - python_version: '3.13t'
             onnx_ml: 1
             debug_build: 0
@@ -51,7 +51,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Set up Python      
+      - name: Set up Python
         uses: Quansight-Labs/setup-python@v5
         # uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
         with:
@@ -73,7 +73,7 @@ jobs:
         if: startsWith(matrix.os,'ubuntu')
         run: |
           if [ "${{ matrix.protobuf_type }}" == "External" ]; then
-            export CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DONNX_USE_PROTOBUF_SHARED_LIBS=ON"
+            export CMAKE_ARGS="$CMAKE_ARGS -DONNX_USE_PROTOBUF_SHARED_LIBS=ON"
           fi
           pip install -e ".[reference]" -v
         env:
