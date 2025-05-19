@@ -12,8 +12,6 @@ find_package(Threads REQUIRED)
 function(AddTest)
   cmake_parse_arguments(_UT "" "TARGET" "SOURCES" ${ARGN})
 
-  list(REMOVE_DUPLICATES _UT_SOURCES)
-
   add_executable(${_UT_TARGET} ${_UT_SOURCES})
 
   target_include_directories(${_UT_TARGET} PUBLIC ${ONNX_INCLUDE_DIRS})
