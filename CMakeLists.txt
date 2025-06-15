@@ -443,13 +443,6 @@ target_include_directories(onnx PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 if(ONNX_BUILD_PYTHON)
-  Python3_add_library(onnx_cpp2py_export MODULE WITH_SOABI "${ONNX_ROOT}/onnx/cpp2py_export.cc")
-  set_target_properties(onnx_cpp2py_export PROPERTIES PREFIX "")
-  set_target_properties(onnx_cpp2py_export PROPERTIES CXX_VISIBILITY_PRESET hidden)
-  set_target_properties(onnx_cpp2py_export PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-
-  # search for FindPython3.cmake instead of legacy modules
-  set(PYBIND11_FINDPYTHON ON)
   # find system pybind11
   find_package(pybind11)
   if(NOT pybind11_FOUND)
@@ -464,7 +457,7 @@ if(ONNX_BUILD_PYTHON)
     FetchContent_MakeAvailable(pybind11)
   endif()
 
-  target_include_directories(onnx_cpp2py_export PRIVATE "${pybind11_INCLUDE_DIRS}")
+  pybind11_add_module(onnx_cpp2py_export MODULE "${ONNX_ROOT}/onnx/cpp2py_export.cc")
 
   if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
     # whole-archive linker option not available on AIX
