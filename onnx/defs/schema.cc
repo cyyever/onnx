@@ -155,7 +155,7 @@ void OpSchema::CheckInputOutputType(struct InferenceContext& ctx) const {
       if (all_types.size() == 1) {
         *param_type = Utils::DataTypeUtils::ToTypeProto(*all_types.begin());
       } else if (type_constraints.find(type_str) != type_constraints.end()) {
-        auto data_type = Utils::DataTypeUtils::ToType(type_constraints[type_str]);
+        const auto* const data_type = Utils::DataTypeUtils::ToType(type_constraints[type_str]);
         *param_type = Utils::DataTypeUtils::ToTypeProto(data_type);
       } else {
         output_type_found = false;
@@ -711,7 +711,7 @@ OpSchema& OpSchema::TypeConstraint(
     const char* description) {
   std::vector<std::string> constraints_vector;
   constraints_vector.reserve(constraints.size());
-  for (auto constraint : constraints) {
+  for (const auto* const constraint : constraints) {
     constraints_vector.emplace_back(constraint);
   }
 
@@ -721,7 +721,7 @@ OpSchema& OpSchema::TypeConstraint(
 void OpSchema::ParseAndSetTypes(
     /*out*/ std::vector<OpSchema::FormalParameter>* formal_parameters) {
   for (auto& formal_parameter : *formal_parameters) {
-    auto& type = formal_parameter.GetTypeStr();
+    const auto& type = formal_parameter.GetTypeStr();
     DataTypeSet allowed_types;
     auto it = type_constraints_.find(type);
     if (it != type_constraints_.end()) {
@@ -822,7 +822,7 @@ OpSchema& OpSchema::FunctionBody(const std::vector<NodeProto>& func_nodes, int o
   }
   auto function_proto = std::make_shared<FunctionProto>();
   for (const auto& node : func_nodes) {
-    auto new_node = function_proto->add_node();
+    auto* new_node = function_proto->add_node();
     new_node->CopyFrom(node);
   }
 
@@ -842,12 +842,12 @@ OpSchema& OpSchema::FunctionBody(
   }
 
   auto function_proto = std::make_shared<FunctionProto>();
-  for (auto& relied_opset : relied_opsets) {
+  for (const auto& relied_opset : relied_opsets) {
     *(function_proto->mutable_opset_import()->Add()) = relied_opset;
   }
 
   for (const auto& node : func_nodes) {
-    auto new_node = function_proto->add_node();
+    auto* new_node = function_proto->add_node();
     new_node->CopyFrom(node);
   }
   // opset import may have been set
@@ -891,7 +891,7 @@ bool OpSchema::ValidateReferencedOpsInFunction(
   if (requested_opset_version == function_since_version) {
     return all_ops_are_invalid;
   }
-  for (auto& node : function->node()) {
+  for (const auto& node : function->node()) {
     if (node.domain().empty() || node.domain() == "ai.onnx") {
       const OpSchema* op1 =
           OpSchemaRegistry::Instance()->GetSchema(node.op_type(), requested_opset_version, node.domain());
@@ -920,13 +920,13 @@ void OpSchema::BuildFunction(FunctionProto& function_body) const {
   function_body.set_name(this->name_);
   function_body.set_doc_string(this->doc_);
   function_body.set_domain(this->domain_);
-  for (auto& i : inputs_) {
+  for (const auto& i : inputs_) {
     function_body.add_input(i.GetName());
   }
-  for (auto& o : outputs_) {
+  for (const auto& o : outputs_) {
     function_body.add_output(o.GetName());
   }
-  for (auto& a : attributes_) {
+  for (const auto& a : attributes_) {
     function_body.add_attribute(a.first);
   }
 
@@ -1759,7 +1759,7 @@ OpName_Domain_Version_Schema_Map& OpSchemaRegistry::map() {
 #ifndef NDEBUG
       size_t dbg_registered_schema_count = GetRegisteredSchemaCount() - dbg_initial_schema_count;
       // Check enabled only if schemas for all opset versions are loaded
-      if (OpSchemaRegistry::Instance()->GetLoadedSchemaVersion() == 0) {
+      if (onnx::OpSchemaRegistry::GetLoadedSchemaVersion() == 0) {
         ONNX_ASSERTM(
             dbg_registered_schema_count == ONNX_DBG_GET_COUNT_IN_OPSETS(),
             "%u schema were exposed from operator sets and automatically placed into the static registry.  "

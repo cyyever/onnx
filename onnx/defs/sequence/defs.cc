@@ -28,7 +28,7 @@ ONNX_OPERATOR_SET_SCHEMA(
         .Output(0, "output", "Empty sequence.", "S")
         .TypeConstraint("S", OpSchema::all_tensor_sequence_types(), "Constrain output types to any tensor type.")
         .TypeAndShapeInferenceFunction([](InferenceContext& ctx) {
-          const auto* attr_proto = ctx.getAttribute("dtype");
+          const auto attr_proto = ctx.getAttribute("dtype");
           auto elem_type = TensorProto::FLOAT;
           if (nullptr != attr_proto) {
             if (!attr_proto->has_i()) {
@@ -76,7 +76,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             fail_type_inference("Element type of inputs are expected to be the same.");
           }
 
-          auto* output_tensor_type =
+          auto output_tensor_type =
               ctx.getOutputType(0)->mutable_sequence_type()->mutable_elem_type()->mutable_tensor_type();
 
           output_tensor_type->set_elem_type(static_cast<TensorProto_DataType>(input_elem_types[0]));
@@ -143,7 +143,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                 tensor_elem_type);
           }
 
-          auto* output_tensor_type =
+          auto output_tensor_type =
               ctx.getOutputType(0)->mutable_sequence_type()->mutable_elem_type()->mutable_tensor_type();
           output_tensor_type->set_elem_type(seq_elem_type);
 
@@ -248,7 +248,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             {"tensor(int64)"},
             "Constrain output to integral tensor. It must be a scalar(tensor of empty shape).")
         .TypeAndShapeInferenceFunction([](InferenceContext& ctx) {
-          auto* output_tensor_type = ctx.getOutputType(0)->mutable_tensor_type();
+          auto output_tensor_type = ctx.getOutputType(0)->mutable_tensor_type();
           output_tensor_type->set_elem_type(TensorProto::INT64);
           output_tensor_type->mutable_shape()->Clear();
         }));
@@ -338,7 +338,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             axis += (upper_bound + 1);
           }
 
-          auto* output_shape = ctx.getOutputType(0)->mutable_tensor_type()->mutable_shape();
+          auto output_shape = ctx.getOutputType(0)->mutable_tensor_type()->mutable_shape();
 
           for (int i = 0; i <= upper_bound; ++i) {
             output_shape->add_dim();
@@ -375,7 +375,7 @@ static void SequenceMapInferenceFunction(InferenceContext& ctx) {
   std::vector<const TypeProto*> subgraph_input_types;
   subgraph_input_types.reserve(num_inputs);
   for (size_t inputIndex = 0; inputIndex < num_inputs; inputIndex++) {
-    auto input_type = ctx.getInputType(inputIndex);
+    const auto* const input_type = ctx.getInputType(inputIndex);
     if (input_type == nullptr) {
       fail_type_inference("Input ", inputIndex, " expected to have type info");
     }
@@ -408,7 +408,7 @@ static void SequenceMapInferenceFunction(InferenceContext& ctx) {
     }
 
     for (size_t outputIndex = 0; outputIndex < num_outputs; outputIndex++) {
-      auto* subgraph_output_type = subgraph_output_types[outputIndex];
+      const auto* const subgraph_output_type = subgraph_output_types[outputIndex];
       ctx.getOutputType(outputIndex)->mutable_sequence_type()->mutable_elem_type()->CopyFrom(*subgraph_output_type);
     }
   }
@@ -422,7 +422,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
   functionProto.clear_input();
   functionProto.clear_output();
 
-  auto body_attr = ctx.getAttribute("body");
+  const auto* const body_attr = ctx.getAttribute("body");
   if (!body_attr || !body_attr->has_g())
     ONNX_THROW_EX(std::invalid_argument("Invalid ``body`` argument. Expected a graph"));
   const GraphProto& body = body_attr->g();
@@ -440,7 +440,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
   if (!ctx.hasInput(0))
     ONNX_THROW_EX(std::invalid_argument(MakeString("Input 0 expected but not provided")));
 
-  const auto* first_input_type = ctx.getInputType(0);
+  const auto* const first_input_type = ctx.getInputType(0);
   assert(first_input_type);
   if (!first_input_type->has_sequence_type())
     ONNX_THROW_EX(std::invalid_argument("Expected a sequence type for input 0"));
@@ -503,7 +503,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
     *loopbody_graph.add_node() = cond_identity;
 
     for (int inputIndex = 0; inputIndex < ninputs; inputIndex++) {
-      const auto* input_type = ctx.getInputType(inputIndex);
+      const auto* const input_type = ctx.getInputType(inputIndex);
       if (input_type && input_type->has_sequence_type()) {
         // If it's a sequence input, extract ``iter_count`` element
         NodeProto seq_at_node;
@@ -587,7 +587,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
 
   auto func_nodes = FunctionBodyHelper::BuildNodes(nodes);
   for (const auto& node : func_nodes) {
-    auto new_node = functionProto.add_node();
+    auto* new_node = functionProto.add_node();
     new_node->CopyFrom(node);
   }
 
