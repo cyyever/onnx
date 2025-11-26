@@ -438,7 +438,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
     ONNX_THROW_EX(std::invalid_argument("Expected 1 or more outputs."));
 
   if (!ctx.hasInput(0))
-    ONNX_THROW_EX(std::invalid_argument(MakeString("Input 0 expected but not provided")));
+    ONNX_THROW_EX(std::invalid_argument("Input 0 expected but not provided"));
 
   const auto* const first_input_type = ctx.getInputType(0);
   assert(first_input_type);
@@ -465,7 +465,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
   }
 
   // Loop body subgraph
-  std::string loopbody_graph_name("SequenceMap_loop_body");
+  const std::string loopbody_graph_name("SequenceMap_loop_body");
   GraphProto loopbody_graph;
   loopbody_graph.set_name(loopbody_graph_name);
   {
@@ -478,19 +478,19 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
     bool_type.mutable_tensor_type()->mutable_shape()->Clear();
 
     ValueInfoProto iter_count;
-    std::string iter_count_name = MakeString(loopbody_graph_name, "_itercount");
+    std::string iter_count_name = loopbody_graph_name + "_itercount";
     iter_count.set_name(iter_count_name);
     *iter_count.mutable_type() = int64_type;
     *loopbody_graph.add_input() = iter_count;
 
     ValueInfoProto cond_in;
-    std::string cond_in_name = MakeString(loopbody_graph_name, "_cond_in");
+    std::string cond_in_name = loopbody_graph_name + "_cond_in";
     cond_in.set_name(cond_in_name);
     *cond_in.mutable_type() = bool_type;
     *loopbody_graph.add_input() = cond_in;
 
     ValueInfoProto cond_out;
-    std::string cond_out_name = MakeString(loopbody_graph_name, "_cond_out");
+    std::string cond_out_name = loopbody_graph_name + "_cond_out";
     cond_out.set_name(cond_out_name);
     *cond_out.mutable_type() = bool_type;
     *loopbody_graph.add_output() = cond_out;
@@ -536,8 +536,8 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
     for (int outputIndex = 0; outputIndex < noutputs; outputIndex++) {
       const auto& body_out_i = body.output(outputIndex);
       assert(body_out_i.type().has_tensor_type());
-      std::string prefix = MakeString(loopbody_graph_name, "_", body_out_i.name());
-      std::string loopbody_in_name = MakeString(prefix, "_in");
+      std::string prefix = loopbody_graph_name + "_" + body_out_i.name();
+      std::string loopbody_in_name = prefix + "_in";
 
       ValueInfoProto tmp;
       *tmp.mutable_type()->mutable_sequence_type()->mutable_elem_type()->mutable_tensor_type() =
@@ -545,7 +545,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
       tmp.set_name(loopbody_in_name);
       *loopbody_graph.add_input() = tmp;
 
-      std::string loopbody_out_name = MakeString(prefix, "_out");
+      std::string loopbody_out_name = prefix + "_out";
       tmp.set_name(loopbody_out_name);
       *loopbody_graph.add_output() = tmp;
 
@@ -564,10 +564,10 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
   // TODO: figure out a way to prevent name collisions?
   auto first_input_name = functionProto.input(0);
   std::string prefix = MakeString("SequenceMap_", first_input_name);
-  std::string seqlen = MakeString(prefix, "_seqlen");
+  std::string seqlen = prefix + "_seqlen";
   nodes.push_back({{seqlen}, "SequenceLength", {first_input_name}});
 
-  std::string cond_bool = MakeString(prefix, "_cond");
+  std::string cond_bool = prefix + "_cond";
   nodes.push_back(FunctionBodyHelper::Const<bool>(cond_bool, true));
 
   std::vector<std::string> loop_node_inputs = {seqlen, cond_bool};
@@ -576,7 +576,7 @@ BuildSequenceMapBodyFunc(const FunctionBodyBuildContext& ctx, const OpSchema& sc
     auto output_name = functionProto.output(outputIndex);
     std::string out_prefix = MakeString("SequenceMap_", output_name);
 
-    std::string seqempty_name = MakeString(out_prefix, "_seqempty");
+    std::string seqempty_name = out_prefix + "_seqempty";
     int64_t dtype = g_outputs.Get(outputIndex).type().tensor_type().elem_type();
     nodes.push_back({{seqempty_name}, "SequenceEmpty", {}, {MakeAttribute("dtype", dtype)}});
     loop_node_inputs.emplace_back(std::move(seqempty_name));
