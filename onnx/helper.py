@@ -86,10 +86,13 @@ def _create_op_set_id_version_map(table: VersionTableType) -> VersionMapType:
     """Create a map from (opset-domain, opset-version) to ir-version from above table."""
     result: VersionMapType = {}
 
-    def process(release_version: str, ir_version: int, *args: Any) -> None:
-        del release_version  # Unused
+    def process(row: VersionRowType) -> None:
+        ir_version = row[1]
+        opset_versions = row[2:]
         for pair in zip(
-            ["ai.onnx", "ai.onnx.ml", "ai.onnx.training"], args, strict=False
+            ["ai.onnx", "ai.onnx.ml", "ai.onnx.training"],
+            opset_versions,
+            strict=False,
         ):
             if pair not in result:
                 result[pair] = ir_version
@@ -97,7 +100,7 @@ def _create_op_set_id_version_map(table: VersionTableType) -> VersionMapType:
                     result["ai.onnx.preview.training", pair[1]] = ir_version
 
     for row in table:
-        process(*row)
+        process(row)
     return result
 
 
@@ -1036,6 +1039,8 @@ def printable_attribute(
         graphs.append(attr.g)
     elif attr.HasField("tp"):
         content.append(f"<Type Proto {attr.tp}>")
+    elif attr.HasField("sparse_tensor"):
+        content.append("<Sparse Tensor>")
     elif attr.floats:
         content.append(str_list(str_float, attr.floats))
     elif attr.ints:
@@ -1045,6 +1050,8 @@ def printable_attribute(
         content.append(str(list(map(_sanitize_str, attr.strings))))
     elif attr.tensors:
         content.append("[<Tensor>, ...]")
+    elif attr.sparse_tensors:
+        content.append("[<Sparse Tensor>, ...]")
     elif attr.type_protos:
         content.append("[")
         for i, tp in enumerate(attr.type_protos):
