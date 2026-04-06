@@ -4,6 +4,8 @@
 
 #include "onnx/checker.h"
 
+#include <algorithm>
+#include <cstdint>
 #include <filesystem> // NOLINT(build/c++17)
 #include <iostream>
 #include <string>
@@ -13,6 +15,7 @@
 
 #include "onnx/common/file_utils.h"
 #include "onnx/common/path.h"
+#include "onnx/common/proto_util.h"
 #include "onnx/common/scoped_resource.h"
 #include "onnx/defs/tensor_proto_util.h"
 #include "onnx/shape_inference/implementation.h"
@@ -799,6 +802,75 @@ void check_opset_compatibility(
   }
 }
 
+namespace {
+
+using FuncPtr = const FunctionProto*;
+using CallGraph = std::unordered_map<FuncPtr, std::unordered_set<FuncPtr>>;
+
+enum class VisitState : uint8_t { Unvisited, InPath, Done };
+
+void DetectCycleDFS(
+    FuncPtr func,
+    const CallGraph& call_graph,
+    std::unordered_map<FuncPtr, VisitState>& state,
+    std::vector<FuncPtr>& path) {
+  state[func] = VisitState::InPath;
+  path.push_back(func);
+
+  if (auto it = call_graph.find(func); it != call_graph.end()) {
+    for (auto callee : it->second) {
+      if (auto s = state[callee]; s == VisitState::InPath) {
+        auto start = std::find(path.begin(), path.end(), callee);
+        std::string cycle;
+        for (auto cit = start; cit != path.end(); ++cit)
+          cycle += (cit == start ? "" : " -> ") + GetFunctionImplId(**cit);
+        fail_check(
+            "Cycle detected in model-local function references: ",
+            cycle,
+            " -> ",
+            GetFunctionImplId(*callee),
+            ". Self-referencing or cyclically-referencing functions would cause infinite recursion.");
+      } else if (s == VisitState::Unvisited) {
+        DetectCycleDFS(callee, call_graph, state, path);
+      }
+    }
+  }
+
+  path.pop_back();
+  state[func] = VisitState::Done;
+}
+
+} // namespace
+
+void check_function_call_cycles(const ModelProto& model) {
+  // Build function map: callee key -> FunctionProto pointer
+  std::unordered_map<std::string, FuncPtr> func_by_key;
+  for (const auto& f : model.functions()) {
+    func_by_key[GetFunctionImplId(f)] = &f;
+  }
+
+  // Build adjacency list using pointers directly
+  CallGraph call_graph;
+  for (const auto& entry : func_by_key) {
+    auto* func = entry.second;
+    auto& callees = call_graph[func];
+    for (const auto& node : func->node()) {
+      auto it = func_by_key.find(GetCalleeId(node));
+      if (it != func_by_key.end()) {
+        callees.insert(it->second);
+      }
+    }
+  }
+
+  std::unordered_map<FuncPtr, VisitState> state;
+  std::vector<FuncPtr> path;
+  for (const auto& entry : func_by_key) {
+    if (state[entry.second] == VisitState::Unvisited) {
+      DetectCycleDFS(entry.second, call_graph, state, path);
+    }
+  }
+}
+
 void check_model_local_functions(
     const ModelProto& model,
     const CheckerContext& ctx,
@@ -818,6 +890,8 @@ void check_model_local_functions(
       }
     }
   }
+
+  check_function_call_cycles(model);
 
   CheckerContext ctx_copy = ctx;
   ctx_copy.set_opset_imports(model_opset_imports);
