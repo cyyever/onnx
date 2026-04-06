@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <utility>
+
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -64,5 +66,19 @@ inline void close_fd(int fd) {
 #endif
 }
 using ScopedFd = ScopedResource<-1, close_fd>;
+
+// RAII guard that invokes a callable on destruction (scope exit).
+template <typename F>
+class ScopeExit {
+  F fn_;
+
+ public:
+  explicit ScopeExit(F fn) : fn_(std::move(fn)) {}
+  ~ScopeExit() {
+    fn_();
+  }
+  ScopeExit(const ScopeExit&) = delete;
+  ScopeExit& operator=(const ScopeExit&) = delete;
+};
 
 } // namespace ONNX_NAMESPACE
