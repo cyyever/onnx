@@ -11,12 +11,19 @@
 #include <utility>
 #include <vector>
 
+#include "onnx/common/safe_math.h"
 #include "onnx/defs/data_propagators.h"
 #include "onnx/defs/doc_strings.h"
 #include "onnx/defs/function.h"
 #include "onnx/defs/tensor/utils.h"
 
 namespace ONNX_NAMESPACE {
+
+static void checked_mul_into(int64_t& accumulator, int64_t value) {
+  if (checked_mul_overflow(accumulator, value, &accumulator)) {
+    fail_shape_inference("Dimension product overflow in Reshape");
+  }
+}
 
 static const char* const GridSample_ver20_doc = kDoc_GridSample_ver20;
 
@@ -1165,7 +1172,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                     if (dataInputTensorType.shape().dim(i).has_dim_value()) {
                       const auto& input_dim_value = dataInputTensorType.shape().dim(i).dim_value();
                       new_dim->set_dim_value(input_dim_value);
-                      outputProduct *= input_dim_value;
+                      checked_mul_into(outputProduct, input_dim_value);
                       unresolvedZeros[i] = false;
                     } else if (dataInputTensorType.shape().dim(i).has_dim_param()) {
                       new_dim->set_dim_param(dataInputTensorType.shape().dim(i).dim_param());
@@ -1173,12 +1180,12 @@ ONNX_OPERATOR_SET_SCHEMA(
                   }
                 } else {
                   new_dim->set_dim_value(dim_value);
-                  outputProduct *= dim_value;
+                  checked_mul_into(outputProduct, dim_value);
                 }
               } else if (dim_value > 0) {
                 // Set the dimension value to dim_value
                 new_dim->set_dim_value(dim_value);
-                outputProduct *= dim_value;
+                checked_mul_into(outputProduct, dim_value);
               } else {
                 // Check if value is less than -1; fail if so
                 fail_shape_inference("Invalid dimension value: ", dim_value);
@@ -1203,7 +1210,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else {
               for (int i = 0; i < dataInputTensorType.shape().dim_size(); ++i) {
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
-                  inputProduct *= dataInputTensorType.shape().dim(i).dim_value();
+                  checked_mul_into(inputProduct, dataInputTensorType.shape().dim(i).dim_value());
                 } else if (i >= static_cast<int>(unresolvedZeros.size()) || !unresolvedZeros[i]) {
                   inputProductValid = false;
                   break;
@@ -1315,7 +1322,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                     if (dataInputTensorType.shape().dim(i).has_dim_value()) {
                       const auto& input_dim_value = dataInputTensorType.shape().dim(i).dim_value();
                       new_dim->set_dim_value(input_dim_value);
-                      outputProduct *= input_dim_value;
+                      checked_mul_into(outputProduct, input_dim_value);
                       unresolvedZeros[i] = false;
                     } else if (dataInputTensorType.shape().dim(i).has_dim_param()) {
                       new_dim->set_dim_param(dataInputTensorType.shape().dim(i).dim_param());
@@ -1323,12 +1330,12 @@ ONNX_OPERATOR_SET_SCHEMA(
                   }
                 } else {
                   new_dim->set_dim_value(dim_value);
-                  outputProduct *= dim_value;
+                  checked_mul_into(outputProduct, dim_value);
                 }
               } else if (dim_value > 0) {
                 // Set the dimension value to dim_value
                 new_dim->set_dim_value(dim_value);
-                outputProduct *= dim_value;
+                checked_mul_into(outputProduct, dim_value);
               } else {
                 // Check if value is less than -1; fail if so
                 fail_shape_inference("Invalid dimension value: ", dim_value);
@@ -1353,7 +1360,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else {
               for (int i = 0; i < dataInputTensorType.shape().dim_size(); ++i) {
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
-                  inputProduct *= dataInputTensorType.shape().dim(i).dim_value();
+                  checked_mul_into(inputProduct, dataInputTensorType.shape().dim(i).dim_value());
                 } else if (i >= static_cast<int>(unresolvedZeros.size()) || !unresolvedZeros[i]) {
                   inputProductValid = false;
                   break;
@@ -1465,7 +1472,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                     if (dataInputTensorType.shape().dim(i).has_dim_value()) {
                       const auto& input_dim_value = dataInputTensorType.shape().dim(i).dim_value();
                       new_dim->set_dim_value(input_dim_value);
-                      outputProduct *= input_dim_value;
+                      checked_mul_into(outputProduct, input_dim_value);
                       unresolvedZeros[i] = false;
                     } else if (dataInputTensorType.shape().dim(i).has_dim_param()) {
                       new_dim->set_dim_param(dataInputTensorType.shape().dim(i).dim_param());
@@ -1473,12 +1480,12 @@ ONNX_OPERATOR_SET_SCHEMA(
                   }
                 } else {
                   new_dim->set_dim_value(dim_value);
-                  outputProduct *= dim_value;
+                  checked_mul_into(outputProduct, dim_value);
                 }
               } else if (dim_value > 0) {
                 // Set the dimension value to dim_value
                 new_dim->set_dim_value(dim_value);
-                outputProduct *= dim_value;
+                checked_mul_into(outputProduct, dim_value);
               } else {
                 // Check if value is less than -1; fail if so
                 fail_shape_inference("Invalid dimension value: ", dim_value);
@@ -1503,7 +1510,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else {
               for (int i = 0; i < dataInputTensorType.shape().dim_size(); ++i) {
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
-                  inputProduct *= dataInputTensorType.shape().dim(i).dim_value();
+                  checked_mul_into(inputProduct, dataInputTensorType.shape().dim(i).dim_value());
                 } else if (i >= static_cast<int>(unresolvedZeros.size()) || !unresolvedZeros[i]) {
                   inputProductValid = false;
                   break;
@@ -1613,7 +1620,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                     if (dataInputTensorType.shape().dim(i).has_dim_value()) {
                       const auto& input_dim_value = dataInputTensorType.shape().dim(i).dim_value();
                       new_dim->set_dim_value(input_dim_value);
-                      outputProduct *= input_dim_value;
+                      checked_mul_into(outputProduct, input_dim_value);
                       unresolvedZeros[i] = false;
                     } else if (dataInputTensorType.shape().dim(i).has_dim_param()) {
                       new_dim->set_dim_param(dataInputTensorType.shape().dim(i).dim_param());
@@ -1621,12 +1628,12 @@ ONNX_OPERATOR_SET_SCHEMA(
                   }
                 } else {
                   new_dim->set_dim_value(dim_value);
-                  outputProduct *= dim_value;
+                  checked_mul_into(outputProduct, dim_value);
                 }
               } else if (dim_value > 0) {
                 // Set the dimension value to dim_value
                 new_dim->set_dim_value(dim_value);
-                outputProduct *= dim_value;
+                checked_mul_into(outputProduct, dim_value);
               } else {
                 // Check if value is less than -1; fail if so
                 fail_shape_inference("Invalid dimension value: ", dim_value);
@@ -1651,7 +1658,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else {
               for (int i = 0; i < dataInputTensorType.shape().dim_size(); ++i) {
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
-                  inputProduct *= dataInputTensorType.shape().dim(i).dim_value();
+                  checked_mul_into(inputProduct, dataInputTensorType.shape().dim(i).dim_value());
                 } else if (i >= static_cast<int>(unresolvedZeros.size()) || !unresolvedZeros[i]) {
                   inputProductValid = false;
                   break;
@@ -1742,7 +1749,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
                   const auto& dim_value = dataInputTensorType.shape().dim(i).dim_value();
                   new_dim->set_dim_value(dim_value);
-                  outputProduct *= dim_value;
+                  checked_mul_into(outputProduct, dim_value);
                   unresolvedZeros[i] = false;
                 } else if (dataInputTensorType.shape().dim(i).has_dim_param()) {
                   const auto& dim_param = dataInputTensorType.shape().dim(i).dim_param();
@@ -1752,7 +1759,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else if (targetShape[i] > 0) {
               // Set the dimension value to targetShape[i]
               new_dim->set_dim_value(targetShape[i]);
-              outputProduct *= targetShape[i];
+              checked_mul_into(outputProduct, targetShape[i]);
             } else {
               // Check if value is less than -1; fail if so
               fail_shape_inference("Invalid dimension value: ", targetShape[i]);
@@ -1777,7 +1784,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else {
               for (int i = 0; i < dataInputTensorType.shape().dim_size(); ++i) {
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
-                  inputProduct *= dataInputTensorType.shape().dim(i).dim_value();
+                  checked_mul_into(inputProduct, dataInputTensorType.shape().dim(i).dim_value());
                 } else if (i >= static_cast<int>(unresolvedZeros.size()) || !unresolvedZeros[i]) {
                   inputProductValid = false;
                   break;
@@ -1854,7 +1861,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
                   const auto& dim_value = dataInputTensorType.shape().dim(i).dim_value();
                   new_dim->set_dim_value(dim_value);
-                  outputProduct *= dim_value;
+                  checked_mul_into(outputProduct, dim_value);
                   unresolvedZeros[i] = false;
                 } else if (dataInputTensorType.shape().dim(i).has_dim_param()) {
                   const auto& dim_param = dataInputTensorType.shape().dim(i).dim_param();
@@ -1864,7 +1871,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else if (targetShape[i] > 0) {
               // Set the dimension value to targetShape[i]
               new_dim->set_dim_value(targetShape[i]);
-              outputProduct *= targetShape[i];
+              checked_mul_into(outputProduct, targetShape[i]);
             } else {
               // Check if value is less than -1; fail if so
               fail_shape_inference("Invalid dimension value: ", targetShape[i]);
@@ -1889,7 +1896,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else {
               for (int i = 0; i < dataInputTensorType.shape().dim_size(); ++i) {
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
-                  inputProduct *= dataInputTensorType.shape().dim(i).dim_value();
+                  checked_mul_into(inputProduct, dataInputTensorType.shape().dim(i).dim_value());
                 } else if (i >= static_cast<int>(unresolvedZeros.size()) || !unresolvedZeros[i]) {
                   inputProductValid = false;
                   break;
@@ -7550,7 +7557,7 @@ ONNX_OPERATOR_SET_SCHEMA(
                     if (dataInputTensorType.shape().dim(i).has_dim_value()) {
                       const auto& input_dim_value = dataInputTensorType.shape().dim(i).dim_value();
                       new_dim->set_dim_value(input_dim_value);
-                      outputProduct *= input_dim_value;
+                      checked_mul_into(outputProduct, input_dim_value);
                       unresolvedZeros[i] = false;
                     } else if (dataInputTensorType.shape().dim(i).has_dim_param()) {
                       new_dim->set_dim_param(dataInputTensorType.shape().dim(i).dim_param());
@@ -7558,12 +7565,12 @@ ONNX_OPERATOR_SET_SCHEMA(
                   }
                 } else {
                   new_dim->set_dim_value(dim_value);
-                  outputProduct *= dim_value;
+                  checked_mul_into(outputProduct, dim_value);
                 }
               } else if (dim_value > 0) {
                 // Set the dimension value to dim_value
                 new_dim->set_dim_value(dim_value);
-                outputProduct *= dim_value;
+                checked_mul_into(outputProduct, dim_value);
               } else {
                 // Check if value is less than -1; fail if so
                 fail_shape_inference("Invalid dimension value: ", dim_value);
@@ -7588,7 +7595,7 @@ ONNX_OPERATOR_SET_SCHEMA(
             } else {
               for (int i = 0; i < dataInputTensorType.shape().dim_size(); ++i) {
                 if (dataInputTensorType.shape().dim(i).has_dim_value()) {
-                  inputProduct *= dataInputTensorType.shape().dim(i).dim_value();
+                  checked_mul_into(inputProduct, dataInputTensorType.shape().dim(i).dim_value());
                 } else if (i >= static_cast<int>(unresolvedZeros.size()) || !unresolvedZeros[i]) {
                   inputProductValid = false;
                   break;
