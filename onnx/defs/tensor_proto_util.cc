@@ -50,8 +50,8 @@ namespace ONNX_NAMESPACE {
           " Actual:",                                                                                              \
           Utils::DataTypeUtils::ToDataTypeString(tensor_proto->data_type()));                                      \
     }                                                                                                              \
-    int64_t num_elements = safe_dim_product(tensor_proto->dims(), [&](const char* msg) {                             \
-      fail_shape_inference(msg, " for tensor: ", tensor_proto->name());                                             \
+    int64_t num_elements = safe_dim_product(tensor_proto->dims(), [&](const char* msg) {                            \
+      fail_shape_inference(msg, " for tensor: ", tensor_proto->name());                                            \
     });                                                                                                              \
     std::vector<type> res;                                                                                         \
     if (tensor_proto->has_data_location() && tensor_proto->data_location() == TensorProto_DataLocation_EXTERNAL) { \
