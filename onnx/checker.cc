@@ -16,6 +16,7 @@
 #include "onnx/common/file_utils.h"
 #include "onnx/common/path.h"
 #include "onnx/common/proto_util.h"
+#include "onnx/common/safe_math.h"
 #include "onnx/common/scoped_resource.h"
 #include "onnx/defs/tensor_proto_util.h"
 #include "onnx/shape_inference/implementation.h"
@@ -113,6 +114,64 @@ void check_value_info(const ValueInfoProto& value_info, const CheckerContext& ct
   }
 }
 
+// Returns the number of bytes per element for the given data type.
+// For sub-byte types (4-bit, 2-bit), returns 0 to signal special handling.
+// Returns -1 for unknown types.
+static int64_t get_element_byte_size(int32_t data_type) {
+  switch (data_type) {
+    case TensorProto::FLOAT:
+    case TensorProto::INT32:
+    case TensorProto::UINT32:
+      return 4;
+    case TensorProto::DOUBLE:
+    case TensorProto::COMPLEX64:
+    case TensorProto::INT64:
+    case TensorProto::UINT64:
+      return 8;
+    case TensorProto::COMPLEX128:
+      return 16;
+    case TensorProto::INT16:
+    case TensorProto::UINT16:
+    case TensorProto::FLOAT16:
+    case TensorProto::BFLOAT16:
+      return 2;
+    case TensorProto::INT8:
+    case TensorProto::UINT8:
+    case TensorProto::BOOL:
+    case TensorProto::FLOAT8E4M3FN:
+    case TensorProto::FLOAT8E4M3FNUZ:
+    case TensorProto::FLOAT8E5M2:
+    case TensorProto::FLOAT8E5M2FNUZ:
+    case TensorProto::FLOAT8E8M0:
+      return 1;
+    // Sub-byte types
+    case TensorProto::UINT4:
+    case TensorProto::INT4:
+    case TensorProto::FLOAT4E2M1:
+    case TensorProto::UINT2:
+    case TensorProto::INT2:
+      return 0;
+    default:
+      return -1;
+  }
+}
+
+// Returns the number of bits per element for sub-byte types.
+// Returns 0 for non-sub-byte types.
+static int get_sub_byte_bits(int32_t data_type) {
+  switch (data_type) {
+    case TensorProto::UINT4:
+    case TensorProto::INT4:
+    case TensorProto::FLOAT4E2M1:
+      return 4;
+    case TensorProto::UINT2:
+    case TensorProto::INT2:
+      return 2;
+    default:
+      return 0;
+  }
+}
+
 void check_tensor(const TensorProto& tensor, const CheckerContext& ctx) {
   enforce_has_field(tensor, data_type);
   if (tensor.data_type() == TensorProto::UNDEFINED) {
@@ -162,9 +221,15 @@ void check_tensor(const TensorProto& tensor, const CheckerContext& ctx) {
     }
     return;
   }
+  // Compute element count with overflow checking.
   int64_t nelem = 1;
   for (auto x : tensor.dims()) {
-    nelem *= x;
+    if (x < 0) {
+      fail_check("Negative dimension value in tensor: ", tensor.name());
+    }
+    if (checked_mul_overflow(nelem, x, &nelem)) {
+      fail_check("Tensor dimension product overflow (tensor name: ", tensor.name(), ")");
+    }
   }
   if (nelem == 0 && num_value_fields != 0) {
     fail_check("TensorProto (tensor name: ", tensor.name(), ") is 0-element but contains data!");
@@ -175,6 +240,34 @@ void check_tensor(const TensorProto& tensor, const CheckerContext& ctx) {
   if (has_raw_data) {
     if (tensor.data_type() == TensorProto::STRING) {
       fail_check("STRING data (tensor name: ", tensor.name(), ") should not be stored in raw_data field");
+    }
+    // Validate that raw_data size is consistent with declared dimensions.
+    int64_t elem_byte_size = get_element_byte_size(tensor.data_type());
+    if (elem_byte_size < 0) {
+      fail_check("Unrecognized data_type (tensor name: ", tensor.name(), "): ", tensor.data_type());
+    }
+    if (nelem > 0) {
+      int64_t expected_bytes;
+      int sub_byte_bits = get_sub_byte_bits(tensor.data_type());
+      if (sub_byte_bits > 0) {
+        // Sub-byte types: ceil(nelem * bits / 8)
+        int elems_per_byte = 8 / sub_byte_bits;
+        expected_bytes = (nelem + elems_per_byte - 1) / elems_per_byte;
+      } else {
+        if (checked_mul_overflow(nelem, elem_byte_size, &expected_bytes)) {
+          fail_check("Tensor byte size overflow (tensor name: ", tensor.name(), ")");
+        }
+      }
+      int64_t actual_bytes = static_cast<int64_t>(tensor.raw_data().size());
+      if (actual_bytes != expected_bytes) {
+        fail_check(
+            "raw_data size mismatch for tensor '",
+            tensor.name(),
+            "': expected ",
+            expected_bytes,
+            " bytes based on dimensions, got ",
+            actual_bytes);
+      }
     }
     return;
   } else {
