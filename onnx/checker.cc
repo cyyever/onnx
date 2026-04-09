@@ -160,8 +160,9 @@ void check_tensor(const TensorProto& tensor, const CheckerContext& ctx) {
     }
     return;
   }
-  int64_t nelem =
-      safe_dim_product(tensor.dims(), [&](const char* msg) { fail_check(msg, " (tensor name: ", tensor.name(), ")"); });
+  int64_t nelem = safe_dim_product(tensor.dims(), [&](const char* msg) {
+    fail_check(msg, " (tensor name: ", tensor.name(), ")");
+  });
   if (nelem == 0 && num_value_fields != 0) {
     fail_check("TensorProto (tensor name: ", tensor.name(), ") is 0-element but contains data!");
   }
