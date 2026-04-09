@@ -111,6 +111,60 @@ void check_value_info(const ValueInfoProto& value_info, const CheckerContext& ct
   }
 }
 
+// Returns bytes per element. 0 = sub-byte, -1 = unknown.
+static int64_t get_element_byte_size(int32_t data_type) {
+  switch (data_type) {
+    case TensorProto::FLOAT:
+    case TensorProto::INT32:
+    case TensorProto::UINT32:
+      return 4;
+    case TensorProto::DOUBLE:
+    case TensorProto::COMPLEX64:
+    case TensorProto::INT64:
+    case TensorProto::UINT64:
+      return 8;
+    case TensorProto::COMPLEX128:
+      return 16;
+    case TensorProto::INT16:
+    case TensorProto::UINT16:
+    case TensorProto::FLOAT16:
+    case TensorProto::BFLOAT16:
+      return 2;
+    case TensorProto::INT8:
+    case TensorProto::UINT8:
+    case TensorProto::BOOL:
+    case TensorProto::FLOAT8E4M3FN:
+    case TensorProto::FLOAT8E4M3FNUZ:
+    case TensorProto::FLOAT8E5M2:
+    case TensorProto::FLOAT8E5M2FNUZ:
+    case TensorProto::FLOAT8E8M0:
+      return 1;
+    case TensorProto::UINT4:
+    case TensorProto::INT4:
+    case TensorProto::FLOAT4E2M1:
+    case TensorProto::UINT2:
+    case TensorProto::INT2:
+      return 0;
+    default:
+      return -1;
+  }
+}
+
+// Returns bits per element for sub-byte types, 0 otherwise.
+static int get_sub_byte_bits(int32_t data_type) {
+  switch (data_type) {
+    case TensorProto::UINT4:
+    case TensorProto::INT4:
+    case TensorProto::FLOAT4E2M1:
+      return 4;
+    case TensorProto::UINT2:
+    case TensorProto::INT2:
+      return 2;
+    default:
+      return 0;
+  }
+}
+
 void check_tensor(const TensorProto& tensor, const CheckerContext& ctx) {
   enforce_has_field(tensor, data_type);
   if (tensor.data_type() == TensorProto::UNDEFINED) {
@@ -172,6 +226,32 @@ void check_tensor(const TensorProto& tensor, const CheckerContext& ctx) {
   if (has_raw_data) {
     if (tensor.data_type() == TensorProto::STRING) {
       fail_check("STRING data (tensor name: ", tensor.name(), ") should not be stored in raw_data field");
+    }
+    int64_t elem_byte_size = get_element_byte_size(tensor.data_type());
+    if (elem_byte_size < 0) {
+      fail_check("Unrecognized data_type (tensor name: ", tensor.name(), "): ", tensor.data_type());
+    }
+    if (nelem > 0) {
+      int64_t expected_bytes;
+      int sub_byte_bits = get_sub_byte_bits(tensor.data_type());
+      if (sub_byte_bits > 0) {
+        int elems_per_byte = 8 / sub_byte_bits;
+        expected_bytes = (nelem + elems_per_byte - 1) / elems_per_byte;
+      } else {
+        if (checked_mul_overflow(nelem, elem_byte_size, &expected_bytes)) {
+          fail_check("Tensor byte size overflow (tensor name: ", tensor.name(), ")");
+        }
+      }
+      int64_t actual_bytes = static_cast<int64_t>(tensor.raw_data().size());
+      if (actual_bytes != expected_bytes) {
+        fail_check(
+            "raw_data size mismatch for tensor '",
+            tensor.name(),
+            "': expected ",
+            expected_bytes,
+            " bytes based on dimensions, got ",
+            actual_bytes);
+      }
     }
     return;
   } else {
