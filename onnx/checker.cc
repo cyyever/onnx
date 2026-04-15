@@ -809,35 +809,65 @@ using CallGraph = std::unordered_map<FuncPtr, std::unordered_set<FuncPtr>>;
 
 enum class VisitState : uint8_t { Unvisited, InPath, Done };
 
+// Iterative DFS to detect cycles in the function call graph.
+// Uses an explicit stack to avoid stack overflow on deeply-chained models.
 void DetectCycleDFS(
-    FuncPtr func,
+    FuncPtr root,
     const CallGraph& call_graph,
     std::unordered_map<FuncPtr, VisitState>& state,
     std::vector<FuncPtr>& path) {
-  state[func] = VisitState::InPath;
-  path.push_back(func);
+  // Each frame tracks the current function and an iterator into its callees.
+  using Iter = std::unordered_set<FuncPtr>::const_iterator;
+  struct Frame {
+    FuncPtr func;
+    Iter cur;
+    Iter end;
+  };
+  std::vector<Frame> stack;
 
-  if (auto it = call_graph.find(func); it != call_graph.end()) {
-    for (auto callee : it->second) {
-      if (auto s = state[callee]; s == VisitState::InPath) {
-        auto start = std::find(path.begin(), path.end(), callee);
-        std::string cycle;
-        for (auto cit = start; cit != path.end(); ++cit)
-          cycle += (cit == start ? "" : " -> ") + GetFunctionImplId(**cit);
-        fail_check(
-            "Cycle detected in model-local function references: ",
-            cycle,
-            " -> ",
-            GetFunctionImplId(*callee),
-            ". Self-referencing or cyclically-referencing functions would cause infinite recursion.");
-      } else if (s == VisitState::Unvisited) {
-        DetectCycleDFS(callee, call_graph, state, path);
-      }
+  auto push = [&](FuncPtr func) {
+    state[func] = VisitState::InPath;
+    path.push_back(func);
+    auto it = call_graph.find(func);
+    if (it != call_graph.end()) {
+      stack.push_back({func, it->second.begin(), it->second.end()});
+    } else {
+      stack.push_back({func, {}, {}});
+    }
+  };
+
+  push(root);
+
+  while (!stack.empty()) {
+    auto& frame = stack.back();
+
+    if (frame.cur == frame.end) {
+      // All callees processed — backtrack.
+      path.pop_back();
+      state[frame.func] = VisitState::Done;
+      stack.pop_back();
+      continue;
+    }
+
+    FuncPtr callee = *frame.cur;
+    ++frame.cur;
+
+    auto s = state[callee];
+    if (s == VisitState::InPath) {
+      auto start = std::find(path.begin(), path.end(), callee);
+      std::string cycle;
+      for (auto cit = start; cit != path.end(); ++cit)
+        cycle += (cit == start ? "" : " -> ") + GetFunctionImplId(**cit);
+      fail_check(
+          "Cycle detected in model-local function references: ",
+          cycle,
+          " -> ",
+          GetFunctionImplId(*callee),
+          ". Self-referencing or cyclically-referencing functions would cause infinite recursion.");
+    } else if (s == VisitState::Unvisited) {
+      push(callee);
     }
   }
-
-  path.pop_back();
-  state[func] = VisitState::Done;
 }
 
 } // namespace
