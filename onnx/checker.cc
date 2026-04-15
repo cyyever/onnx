@@ -807,6 +807,10 @@ namespace {
 using FuncPtr = const FunctionProto*;
 using CallGraph = std::unordered_map<FuncPtr, std::unordered_set<FuncPtr>>;
 
+// Limits to reject obviously malicious models early.
+constexpr int kMaxModelLocalFunctions = 10000;
+constexpr size_t kMaxFunctionCallDepth = 100;
+
 enum class VisitState : uint8_t { Unvisited, InPath, Done };
 
 // Iterative DFS to detect cycles in the function call graph.
@@ -828,6 +832,12 @@ void DetectCycleDFS(
   auto push = [&](FuncPtr func) {
     state[func] = VisitState::InPath;
     path.push_back(func);
+    if (path.size() > kMaxFunctionCallDepth) {
+      fail_check(
+          "Function call chain depth exceeds limit (",
+          kMaxFunctionCallDepth,
+          "). The model may be malformed or malicious.");
+    }
     auto it = call_graph.find(func);
     if (it != call_graph.end()) {
       stack.push_back({func, it->second.begin(), it->second.end()});
@@ -873,6 +883,15 @@ void DetectCycleDFS(
 } // namespace
 
 void check_function_call_cycles(const ModelProto& model) {
+  if (model.functions_size() > kMaxModelLocalFunctions) {
+    fail_check(
+        "Model contains ",
+        model.functions_size(),
+        " local functions, exceeding the limit of ",
+        kMaxModelLocalFunctions,
+        ". The model may be malformed or malicious.");
+  }
+
   // Build function map: callee key -> FunctionProto pointer
   std::unordered_map<std::string, FuncPtr> func_by_key;
   for (const auto& f : model.functions()) {
