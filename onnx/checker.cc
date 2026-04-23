@@ -892,16 +892,14 @@ void check_function_call_cycles(const ModelProto& model) {
         ". The model may be malformed or malicious.");
   }
 
-  // Build function map: callee key -> FunctionProto pointer
+  // Build function map: callee key -> FunctionProto pointer.
+  // Duplicate keys could mask cycles, so reject them here.
   std::unordered_map<std::string, FuncPtr> func_by_key;
   for (const auto& f : model.functions()) {
-    const std::string function_impl_id = GetFunctionImplId(f);
-    const auto [it, inserted] = func_by_key.emplace(function_impl_id, &f);
+    const auto function_impl_id = GetFunctionImplId(f);
+    const bool inserted = func_by_key.emplace(function_impl_id, &f).second;
     if (!inserted) {
-      fail_check(
-          "Model contains multiple local functions with the same implementation id '",
-          function_impl_id,
-          "'.");
+      fail_check("Model contains multiple local functions with the same implementation id '", function_impl_id, "'.");
     }
   }
 

@@ -884,7 +884,7 @@ void ShapeInferenceImplBase::ProcessCall(const NodeProto& caller, const Function
         GetFunctionImplId(callee),
         "' is already being expanded in the current call chain.");
   }
-  ScopeExit guard([&] { active_functions->erase(&callee); });
+  ScopeExit guard([&]() noexcept { active_functions->erase(&callee); });
 
   DataValueMap callee_value_map;
   if (generated_shape_data_by_name != nullptr) {

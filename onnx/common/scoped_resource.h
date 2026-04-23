@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <type_traits>
 #include <utility>
 
 #ifdef _WIN32
@@ -74,7 +75,8 @@ class ScopeExit {
 
  public:
   explicit ScopeExit(F fn) : fn_(std::move(fn)) {}
-  ~ScopeExit() {
+  ~ScopeExit() noexcept {
+    static_assert(std::is_nothrow_invocable_v<F&>, "ScopeExit callable must be noexcept");
     fn_();
   }
   ScopeExit(const ScopeExit&) = delete;
