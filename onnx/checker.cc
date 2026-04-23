@@ -895,7 +895,14 @@ void check_function_call_cycles(const ModelProto& model) {
   // Build function map: callee key -> FunctionProto pointer
   std::unordered_map<std::string, FuncPtr> func_by_key;
   for (const auto& f : model.functions()) {
-    func_by_key[GetFunctionImplId(f)] = &f;
+    const std::string function_impl_id = GetFunctionImplId(f);
+    const auto [it, inserted] = func_by_key.emplace(function_impl_id, &f);
+    if (!inserted) {
+      fail_check(
+          "Model contains multiple local functions with the same implementation id '",
+          function_impl_id,
+          "'.");
+    }
   }
 
   // Build adjacency list using pointers directly
