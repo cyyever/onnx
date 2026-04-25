@@ -45,10 +45,29 @@ jobs:
          persist-credentials: false
 
     - name: Set up Python ${{ matrix.python-version }}
+      if: ${{ !(matrix.architecture == 'arm64' && (matrix.python-version == '3.13t' || matrix.python-version == '3.14t')) }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.architecture }}
+
+    # Workaround for actions/partner-runner-images#154: setup-python breaks
+    # on windows-11-arm with pre-cached free-threaded Python. Use NuGet directly.
+    - name: Install NuGet
+      if: ${{ matrix.architecture == 'arm64' && (matrix.python-version == '3.13t' || matrix.python-version == '3.14t') }}
+      uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123 # v4.0
+
+    - name: Set up free-threaded Python ${{ matrix.python-version }} on windows-11-arm
+      if: ${{ matrix.architecture == 'arm64' && (matrix.python-version == '3.13t' || matrix.python-version == '3.14t') }}
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $version = if ('${{ matrix.python-version }}' -eq '3.13t') { '3.13.13' } else { '3.14.4' }
+        nuget install pythonarm64-freethreaded -Version $version -OutputDirectory $env:RUNNER_TEMP\py -ExcludeVersion
+        $tools = "$env:RUNNER_TEMP\py\pythonarm64-freethreaded\tools"
+        "$tools" >> $env:GITHUB_PATH
+        "$tools\Scripts" >> $env:GITHUB_PATH
+        & "$tools\python.exe" -m ensurepip --upgrade
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
