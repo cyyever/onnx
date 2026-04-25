@@ -62,6 +62,11 @@ jobs:
             - uses: security-and-quality
           paths-ignore:
             - '.setuptools-cmake-build/**'
+            - 'onnx/**/*_pb2.py'
+            - 'onnx/**/*_pb2.pyi'
+            - '**/*.pb.cc'
+            - '**/*.pb.h'
+            - 'onnx/backend/test/data/**'
           query-filters:
             - exclude:
                 id: py/import-and-import-from
