@@ -64,6 +64,7 @@ jobs:
             - uses: security-and-quality
           paths-ignore:
             - '.setuptools-cmake-build/**'
+            - 'build/**'
             - 'onnx/**/*_pb2.py'
             - 'onnx/**/*_pb2.pyi'
             - '**/*.pb.cc'
