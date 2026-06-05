@@ -144,8 +144,12 @@ static std::unordered_map<std::string, nb::bytes> CallNodeInferenceFunction(
   shape_inference::GraphInferenceContext graphInferenceContext(
       valueTypes.second, opsetImports, nullptr, {}, OpSchemaRegistry::Instance(), nullptr, irVersion);
   // Construct inference context and get results - may throw InferenceError
-  // TODO(ONNX): if it is desirable for infer_node_outputs to provide check_type, strict_mode, data_prop,
-  // we can add them to the Python API. For now we just assume the default options.
+  // The check_type, strict_mode, and data_prop options are deliberately not exposed on
+  // infer_node_outputs: they only take effect in the full-graph InferShapesImpl loop, which
+  // gates CheckInputOutputType on check_type, accumulates/throws errors per strict_mode, and
+  // runs the data-propagation function per data_prop. This single-node path does none of that
+  // (it always calls CheckInputOutputType below and never runs data propagation), so plumbing
+  // the options through here would be no-ops.
   ShapeInferenceOptions options{false, 0, false};
   shape_inference::InferenceContextImpl ctx(
       node, valueTypes.second, inputData.second, inputSparseData.second, options, nullptr, &graphInferenceContext);
