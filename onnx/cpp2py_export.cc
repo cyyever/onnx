@@ -186,8 +186,15 @@ static std::tuple<std::vector<T>, std::vector<const T*>> ConvertPyObjToPtr(const
 }
 
 NB_MODULE(onnx_cpp2py_export, onnx_cpp2py_export) {
-  // Disabling nanobind leak warnings
-  // TODO(#7283): Avoid leaks if possible
+  // Suppress nanobind's shutdown leak warnings (#7283). Registering a custom OpSchema with a
+  // Python type/shape inference function (set_type_and_shape_inference_function) creates a
+  // reference cycle that Python's GC cannot break: the callable's __globals__ reaches back to
+  // the onnx module, while the process-global static OpSchemaRegistry holds the callable through
+  // a std::function -- a C++ link invisible to the GC. nanobind then reports the module's
+  // functions/types as leaked at interpreter shutdown. nanobind's tp_traverse/tp_clear remedy
+  // does not apply to a std::function held in a static registry, and deregistering schemas at
+  // exit does not break the cycle, so suppression (nanobind's documented fallback) is used here.
+  // See https://nanobind.readthedocs.io/en/latest/refleaks.html
   nb::set_leak_warnings(false);
 
   onnx_cpp2py_export.doc() = "Python interface to ONNX";
@@ -200,7 +207,9 @@ NB_MODULE(onnx_cpp2py_export, onnx_cpp2py_export) {
 #endif // ONNX_ML
   );
 
-  // Avoid Segmentation fault if we not free the python function in Custom Schema
+  // A module-level cleanup capsule that deregisters all schemas (to release the Python
+  // callables noted above) would run during interpreter finalization and segfaults under
+  // nanobind, so it stays disabled. See the leak note above and #7283.
   // onnx_cpp2py_export.attr("_cleanup") = nb::capsule(+[] { OpSchemaRegistry::OpSchemaDeregisterAll(); });
 
   // Submodule `schema`
