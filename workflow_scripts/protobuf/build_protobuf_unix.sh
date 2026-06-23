@@ -31,7 +31,7 @@ wget https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protobu
 tar -xvf protobuf-25.1.tar.gz
 cd protobuf-25.1
 mkdir build_source && cd build_source
-cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL_PROTOBUF_PATH -DCMAKE_POSITION_INDEPENDENT_CODE=ON -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DABSL_ROOT_DIR="${ORIGINAL_PATH}/../abseil-cpp-20230802.2" -DCMAKE_CXX_STANDARD=17 -DABSL_PROPAGATE_CXX_STD=on ..
+cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALL_PROTOBUF_PATH -DCMAKE_POSITION_INDEPENDENT_CODE=ON -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DABSL_ROOT_DIR="${ORIGINAL_PATH}/../abseil-cpp-20230802.2" -DCMAKE_CXX_STANDARD=20 -DABSL_PROPAGATE_CXX_STD=on ..
 if [ "$INSTALL_PROTOBUF_PATH" == "/usr" ]; then
     # Don't use sudo for root
     if [[ "$(id -u)" == "0" ]]; then
