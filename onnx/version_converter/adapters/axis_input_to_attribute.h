@@ -42,7 +42,7 @@ class AxisInputToAttribute : public Adapter {
       return EnsureAndReturnNode(node);
     }
 
-    ONNX_ASSERTM(false, "Axis input must be a constant or initializer for promotion to attribute.")
+    ONNX_THROW("Axis input must be a constant or initializer for promotion to attribute.");
   }
 
  private:
