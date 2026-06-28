@@ -5,10 +5,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from onnx.reference.ops._op_common_pool import CommonPool
+from onnx.reference.op_run import OpRun
 
 
-class MaxPool(CommonPool):
+class MaxPool(OpRun):
     def _run(
         self,
         x,
@@ -20,27 +20,7 @@ class MaxPool(CommonPool):
         storage_order=None,
         strides=None,
     ):
-        if (
-            dilations is not None
-            and (min(dilations) != max(dilations) or min(dilations) != 1)
-        ) or (
-            strides is not None and (min(strides) != max(strides) or min(strides) != 1)
-        ):
-            return self._max_pool(
-                x,
-                auto_pad=auto_pad,
-                ceil_mode=ceil_mode,
-                dilations=dilations,
-                kernel_shape=kernel_shape,
-                pads=pads,
-                storage_order=storage_order,
-                strides=strides,
-            )
-
-        return CommonPool._run(
-            self,
-            "MAX",
-            0,
+        return self._max_pool(
             x,
             auto_pad=auto_pad,
             ceil_mode=ceil_mode,
@@ -110,21 +90,22 @@ class MaxPool(CommonPool):
             # Deprecated attribute
             if auto_pad in ("SAME_UPPER", "SAME_LOWER"):
                 for i in range(len(input_spatial_shape)):
-                    if auto_pad == "SAME_UPPER":
-                        output_spatial_shape[i] = int(
-                            np.ceil(input_spatial_shape[i] / strides[i])
-                        )
-                    else:
-                        output_spatial_shape[i] = int(
-                            np.floor(input_spatial_shape[i] / strides[i])
-                        )
+                    # SAME output spans ceil(input / stride) for both variants.
+                    output_spatial_shape[i] = int(
+                        np.ceil(input_spatial_shape[i] / strides[i])
+                    )
                     pad_i = (
                         (output_spatial_shape[i] - 1) * strides[i]
                         + ((kernel_shape[i] - 1) * dilations[i] + 1)
                         - input_spatial_shape[i]
                     )
-                    new_pads[i, 0] = pad_i // 2
-                    new_pads[i, 1] = pad_i - new_pads[i, 0]
+                    # SAME_UPPER puts the larger half at the end, SAME_LOWER at the start.
+                    if auto_pad == "SAME_UPPER":
+                        new_pads[i, 0] = pad_i // 2
+                        new_pads[i, 1] = pad_i - new_pads[i, 0]
+                    else:
+                        new_pads[i, 1] = pad_i // 2
+                        new_pads[i, 0] = pad_i - new_pads[i, 1]
             else:
                 for i in range(len(input_spatial_shape)):
                     output_spatial_shape[i] = int(
