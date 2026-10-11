@@ -371,7 +371,6 @@ if(NOT ONNX_PROTOC_EXECUTABLE)
     set(protobuf_MSVC_STATIC_RUNTIME ${ONNX_USE_MSVC_STATIC_RUNTIME})
 
     include(FetchContent)
-    set(ABSL_PROPAGATE_CXX_STD 1)
     set(ONNX_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
     set(ONNX_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
     # Use this setting to build third-party libs.
@@ -417,20 +416,14 @@ if(NOT ONNX_PROTOC_EXECUTABLE)
     FetchContent_MakeAvailable(Protobuf)
     # utf8_validity.h is included by protobuf headers but its include dir
     # is only added via include_directories() inside protobuf's directory scope.
-    # Attach it to the protobuf target so ONNX targets can compile .pb.cc files
-    # without introducing a global include path.
+    # Attach it to the protobuf targets instead (the real ones: the
+    # protobuf::libprotobuf* aliases cannot take include directories) so ONNX
+    # targets can compile .pb.cc files without a global include path.
     if(EXISTS "${protobuf_SOURCE_DIR}/third_party/utf8_range")
-      # protobuf::libprotobuf and protobuf::libprotobuf-lite are ALIAS targets
-      # and CMake does not allow target_include_directories on aliases;
-      # resolve to the real targets before adding the utf8_range include path.
-      foreach(_pb_alias libprotobuf libprotobuf-lite)
-        if(TARGET protobuf::${_pb_alias})
-          get_target_property(_pb_real protobuf::${_pb_alias} ALIASED_TARGET)
-          if(NOT _pb_real)
-            set(_pb_real protobuf::${_pb_alias})
-          endif()
+      foreach(_pb_target libprotobuf libprotobuf-lite)
+        if(TARGET ${_pb_target})
           target_include_directories(
-            ${_pb_real}
+            ${_pb_target}
             INTERFACE
               $<BUILD_INTERFACE:${protobuf_SOURCE_DIR}/third_party/utf8_range>
           )
