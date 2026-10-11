@@ -67,7 +67,7 @@ C++17 or higher C++ compiler version is required to build ONNX from source. Stil
 
 Protobuf is required for ONNX. If you don't have Protobuf installed, ONNX will internally download and build the version pinned in [`sbom.cdx.json`](sbom.cdx.json).
 
-Protobuf uses different major-version numbers for some language runtimes. In this checkout, the Python package requirement is `protobuf 6.31.1` in [`pyproject.toml`](pyproject.toml), while the corresponding upstream C++ library and compiler release is `v31.1` in [`sbom.cdx.json`](sbom.cdx.json). These version strings are related but are not interchangeable: use the `v31.1` tag when building the C++ library or `protoc` from source. See [Protobuf version support](https://protobuf.dev/support/version-support/) for an explanation of the versioning scheme.
+Protobuf uses different major-version numbers for some language runtimes. In this checkout, the Python package requirement is `protobuf 7.35.1` in [`pyproject.toml`](pyproject.toml), while the corresponding upstream C++ library and compiler release is `v35.1` in [`sbom.cdx.json`](sbom.cdx.json). These version strings are related but are not interchangeable: use the `v35.1` tag when building the C++ library or `protoc` from source. See [Protobuf version support](https://protobuf.dev/support/version-support/) for an explanation of the versioning scheme.
 
 Or, you can manually install [Protobuf C/C++ libraries and tools](https://github.com/protocolbuffers/protobuf) with specified version before proceeding forward. Then depending on how you installed Protobuf, you need to set environment variable CMAKE_ARGS to "-DONNX_USE_PROTOBUF_SHARED_LIBS=ON" or "-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF". For example, you may need to run the following command:
 
@@ -99,7 +99,7 @@ pip install -e . -v
 
 #### Building Protobuf from source
 
-Normally, ONNX's CMake configuration downloads the pinned Protobuf release automatically. If you need to provide an external Protobuf installation, build the C++ release recorded in [`sbom.cdx.json`](sbom.cdx.json), currently `v31.1`. Build it as either a static or shared library and set `ONNX_USE_PROTOBUF_SHARED_LIBS` consistently.
+Normally, ONNX's CMake configuration downloads the pinned Protobuf release automatically. If you need to provide an external Protobuf installation, build the C++ release recorded in [`sbom.cdx.json`](sbom.cdx.json), currently `v35.1`. Build it as either a static or shared library and set `ONNX_USE_PROTOBUF_SHARED_LIBS` consistently.
 
 Run the following commands from the x64 Native Tools Command Prompt for Visual Studio 2022. Keep the CMake generator consistent while building Protobuf and ONNX.
 
@@ -108,7 +108,7 @@ You can build Protobuf from source by running the following commands:
 ```bat
 git clone https://github.com/protocolbuffers/protobuf.git
 cd protobuf
-git checkout v31.1
+git checkout v35.1
 git submodule update --init --recursive
 cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX=<protobuf_install_dir> -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -Dprotobuf_BUILD_SHARED_LIBS=OFF -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_EXAMPLES=OFF
 cmake --build . --config Release --target install
@@ -141,7 +141,7 @@ pip install -e . -v
 
 ### Linux
 
-ONNX can use an external Protobuf installation. The C++ library and `protoc` release pinned and tested by this checkout is `v31.1`, as recorded in [`sbom.cdx.json`](sbom.cdx.json). This is distinct from the Python package version `6.31.1`.
+ONNX can use an external Protobuf installation. The C++ library and `protoc` release pinned and tested by this checkout is `v35.1`, as recorded in [`sbom.cdx.json`](sbom.cdx.json). This is distinct from the Python package version `7.35.1`.
 
 Ubuntu users may install Protobuf using the system package manager:
 
@@ -158,7 +158,7 @@ To build and install the pinned Protobuf release from source, use the instructio
 ```sh
   git clone https://github.com/protocolbuffers/protobuf.git
   cd protobuf
-  git checkout v31.1
+  git checkout v35.1
   git submodule update --init --recursive
   mkdir build_source && cd build_source
   cmake -Dprotobuf_BUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=/usr -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON ..
@@ -189,7 +189,7 @@ brew update
 brew install cmake
 git clone https://github.com/protocolbuffers/protobuf.git
 cd protobuf
-git checkout v31.1
+git checkout v35.1
 git submodule update --init --recursive
 mkdir build_source && cd build_source
 cmake -Dprotobuf_BUILD_SHARED_LIBS=OFF -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON ..

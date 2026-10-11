@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [build-system]
-requires = ["scikit-build-core>=0.11", "protobuf==6.31.1"]
+requires = ["scikit-build-core>=0.11", "protobuf==7.35.1"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -22,7 +22,7 @@ license = "Apache-2.0"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.26",
-    "protobuf>=6.31.1",
+    "protobuf>=7.35.1",
     "typing_extensions>=4.7.1",
     "ml_dtypes>=0.5.4",
 ]

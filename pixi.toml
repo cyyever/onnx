@@ -84,7 +84,8 @@ cmd = "cd docs/docsgen && make html"
 
 [dependencies]
 libdate = ">=3.0.1,<4"
-libprotobuf = "<7"  # libprotobuf>=7 has breaking changes which need a dedicated PR
+# Keep protoc in sync with the python protobuf runtime conda-forge provides.
+libprotobuf = ">=7.35.1,<7.36"
 make = "*"
 ml_dtypes = ">=0.5.1"
 nanobind = ">=2.8.0"
@@ -101,7 +102,7 @@ cxx-compiler = ">=1.8.0"
 # follows requirements-dev.txt
 ml_dtypes = ">=0.5.1"
 numpy = ">=1.26"
-protobuf = ">=6.31.1"
+protobuf = ">=7.35.1"
 pytest = ">=8.3.4"
 pytest-cov = ">=6.0.0"
 pytest-xdist = ">=3.6.1"
@@ -112,7 +113,7 @@ onnxruntime = "*"
 pillow = ">=12.2.0"
 
 [feature.oldies.dependencies]
-protobuf = "==6.31.1"
+protobuf = "==7.35.1"
 python = "3.11.*"
 numpy = "==1.26.4"
 
@@ -123,7 +124,7 @@ prek = ">=0.3.9"
 prettier = ">=3.8.1,<4"
 ruff = ">=0.15.7"
 shellcheck = ">=0.11.0"
-types-protobuf = ">=6.32.1.20260221,<7"
+types-protobuf = ">=7.35.1.20260906,<8"
 typos = ">=1.44.0,<2"
 
 [feature.lintrunner.pypi-dependencies]
